@@ -10,7 +10,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -50,28 +49,6 @@ public class LoginResource {
 	private final Gson g = new Gson();
 
 	public LoginResource() {
-	} // Nothing to be done here
-
-	@POST
-	@Path("/")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response doLogin(LoginData data) {
-		LOG.fine("Login attempt by user: " + data.username);
-		if (data.username.equals("jleitao") && data.password.equals("password")) {
-			AuthToken at = new AuthToken(data.username);
-			return Response.ok(g.toJson(at)).build();
-		}
-		return Response.status(Status.FORBIDDEN).entity("Incorrect username or password.").build();
-	}
-
-	@GET
-	@Path("/{username}")
-	public Response checkUsernameAvailable(@PathParam("username") String username) {
-		if (username.equals("jleitao")) {
-			return Response.ok().entity(g.toJson(false)).build();
-		} else {
-			return Response.ok().entity(g.toJson(true)).build();
-		}
 	}
 	
 	@POST
@@ -97,9 +74,9 @@ public class LoginResource {
 				Entity userLog = Entity.newBuilder(logKey)
 						.set("loginTime", Timestamp.now())
 						.build();
+				AuthToken at = new AuthToken(data.username, user.getString("role"));
 				txn.put(userLog);
 				txn.commit();
-				AuthToken at = new AuthToken(data.username);
 				LOG.info("User '" + data.username + "' logged in successfully.");
 				return Response.ok(g.toJson(at)).build();
 			} else {
@@ -178,9 +155,9 @@ public class LoginResource {
 					.set("loginCountry", loginCountry)
 					.set("loginTime", Timestamp.now())
 					.build();
+				AuthToken at = new AuthToken(data.username, user.getString("role"));
 				txn.put(log, loginStats);
 				txn.commit();
-				AuthToken at = new AuthToken(data.username);
 				LOG.info("User '" + data.username + "' logged in successfully.");
 				return Response.ok(g.toJson(at)).build();
 			} else {
