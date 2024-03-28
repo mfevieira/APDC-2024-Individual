@@ -15,7 +15,7 @@ import com.google.cloud.datastore.*;
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 
-@Path("/role")
+@Path("/state")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class StateResource {
  
@@ -38,20 +38,25 @@ public class StateResource {
     public Response changeState(String username, AuthToken token) {
         LOG.fine("State changing attempt of: " + username + " by " + token.username);
         if ( token.role.equals(UserConstants.USER) ) {
-            return Response.status(Status.UNAUTHORIZED).build();
+            return Response.status(Status.UNAUTHORIZED).entity("USER roles cannot change any user states.").build();
         }
         Transaction txn = datastore.newTransaction();
         try {
             Key userKey = userKeyFactory.newKey(username);
-            Key adminUserKey = userKeyFactory.newKey(token.username);
+            Key adminKey = userKeyFactory.newKey(token.username);
             Entity user = txn.get(userKey);
-            Entity adminUser = txn.get(adminUserKey);
-            if ( adminUser == null || user == null ) {
+            Entity admin = txn.get(adminKey);
+            if ( admin == null ) {
                 txn.rollback();
-                return Response.status(Status.BAD_REQUEST).build();
+				LOG.warning("State change: " + token.username + " not registered as user.");
+                return Response.status(Status.NOT_FOUND).entity("Admin is not registered as a user.").build();
+            } else if ( user == null ) {
+                txn.rollback();
+				LOG.warning("State change: " + username + " not registered as user.");
+                return Response.status(Status.NOT_FOUND).entity("User is not registered as a user.").build();
             }
-            String adminRole = adminUser.getString("role");
-            int validation = token.isStillValid(adminUser.getString("tokenID"), adminRole);
+            String adminRole = admin.getString("role");
+            int validation = token.isStillValid(admin.getString("tokenID"), adminRole);
             if ( validation == 1 ) {
                 if ( adminRole.equals(UserConstants.GBO) ) {
                     if ( user.getString("role").equals(UserConstants.USER) ) {
@@ -61,7 +66,8 @@ public class StateResource {
                             .build();
                     } else { // GBO users can only change USER states
                         txn.rollback();
-                        return Response.status(Status.UNAUTHORIZED).build();
+                        LOG.warning("State change: " + token.username + " attmepted to change the state of a non USER role.");
+                        return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change non USER roles' states.").build();
                     }
                 } else if ( adminRole.equals(UserConstants.GA) ) {
                     String userRole = user.getString("role");
@@ -72,42 +78,55 @@ public class StateResource {
                             .build();
                     } else { // GA users can change USER and GBO states
                         txn.rollback();
-                        return Response.status(Status.UNAUTHORIZED).build();
+                        LOG.warning("State change: " + token.username + " attmepted to change the state of a non USER or GBO role.");
+                        return Response.status(Status.UNAUTHORIZED).entity("GA users cannot change non USER and GBO roles' states.").build();
                     }
                 } else if ( adminRole.equals(UserConstants.SU) ) {
                     String state = user.getString("state").equals(UserConstants.ACTIVE) ? UserConstants.INACTIVE : UserConstants.ACTIVE;
                         user = Entity.newBuilder(user)
                             .set("state", state)
                             .build();
+                } else if ( adminRole.equals(UserConstants.USER) ) {
+                    txn.rollback();
+                    LOG.warning("State change: " + token.username + " attmepted to change the state of a user as a USER role.");
+                    return Response.status(Status.UNAUTHORIZED).entity("USER users cannot change states.").build();
                 } else {
                     txn.rollback();
+                    LOG.severe("State change: Unrecognized role.");
                     return Response.status(Status.INTERNAL_SERVER_ERROR).build();
                 }
                 txn.update(user);
                 txn.commit();
-                // TODO: Send the proper confirmation back
-                return Response.ok().build();
+                LOG.fine("State change: " + username + "'s role changed by " + token.username + ".");
+                return Response.ok().entity("User state changed.").build();
             } else if (validation == 0 ) {
                 // TODO: Send the admin back to the login page
                 txn.rollback();
-                return Response.status(Status.CONFLICT).build();
+                LOG.fine("State change: " + token.username + "'s' authentication token expired.");
+                return Response.status(Status.UNAUTHORIZED).entity("Token time limit exceeded, make new login.").build();
             } else if ( validation == -1 ) { // Role is different
+                // TODO: Send the admin back to the login page
                 txn.rollback();
-                return Response.status(Status.CONFLICT).build();
+                LOG.warning("State change: " + token.username + "'s' authentication token has different role.");
+                return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
             } else if ( validation == -2 ) { // tokenID is false
+                // TODO: Send the admin back to the login page
                 txn.rollback();
-                return Response.status(Status.CONFLICT).build();
+                LOG.severe("State change: " + token.username + "'s' authentication token has different tokenID, possible attempted breach.");
+                return Response.status(Status.UNAUTHORIZED).entity("TokenId incorrect, make new login").build();
             } else {
                 txn.rollback();
+                LOG.severe("State change: " + token.username + "'s' authentication token validity error.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
         } catch ( Exception e ) {
 			txn.rollback();
-			LOG.severe(e.getMessage());
+			LOG.severe("State change: " + e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		} finally {
             if ( txn.isActive() ) {
                 txn.rollback();
+                LOG.severe("State change: Internal server error.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
         }

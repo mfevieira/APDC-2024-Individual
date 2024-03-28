@@ -14,7 +14,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
+import com.google.gson.Gson;
 
+import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.LoginData;
 import pt.unl.fct.di.apdc.projeto.util.RegisterData;
 import pt.unl.fct.di.apdc.projeto.util.UserConstants;
@@ -33,10 +35,13 @@ public class RegisterResource {
 	/** The User kind key factory */
 	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
 
+	/** The converter to JSON */
+	private final Gson g = new Gson();
+
 	public RegisterResource() {
 	}
 
-	@POST
+	/*@POST
 	@Path("/v1")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response registerV1(LoginData data) {
@@ -102,21 +107,22 @@ public class RegisterResource {
 				txn.rollback();
 			}
 		}
-	}
-
+	}*/
 
 	@POST
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response register(OptionalRegisterData data) {
-		LOG.fine("Resgistry attempt by: " + data.username);
+		LOG.fine("Resgister: attempt to register " + data.username + ".");
 		if (!data.validRegistration()) {
+			LOG.warning("Register: Register attempt using missing or invalid parameters.");
 			return Response.status(Status.BAD_REQUEST).entity("Missing or invalid parameter.").build();
 		}
 		Transaction txn = datastore.newTransaction();
 		try {
 			Key userKey = userKeyFactory.newKey(data.username);
 			if (txn.get(userKey) == null) {
+				AuthToken token = new AuthToken(data.username, UserConstants.USER);
 				Entity user = Entity.newBuilder(userKey)
 						.set("password", DigestUtils.sha3_512Hex(data.password))
 						.set("email", data.email)
@@ -131,20 +137,29 @@ public class RegisterResource {
 						.set("role", UserConstants.USER)
 						.set("state", UserConstants.INACTIVE)
 						.set("userCreationTime", Timestamp.now())
+						.set("tokenID", token.tokenID)
 						.build();
 				txn.add(user);
 				txn.commit();
-				LOG.info("User Registered: " + data.username);
-				return Response.ok(Status.CREATED).build();
+				LOG.fine("Register: " + data.username + "'s was registered in the database.");
+				return Response.ok(g.toJson(token)).entity("User Registered.").build();
 			} else {
 				txn.rollback();
-				return Response.status(Status.BAD_REQUEST)
+				LOG.fine("Register: duplicate username.");
+				// TODO: send user back to register page
+				return Response.status(Status.CONFLICT)
 						.entity("User already exists. Pick a different username.")
 						.build();
 			}
+		} catch ( Exception e ) {
+			txn.rollback();
+			LOG.severe("Register: " + e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		} finally {
 			if (txn.isActive()) {
 				txn.rollback();
+                LOG.severe("Register: Internal server error.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 		}
 	}

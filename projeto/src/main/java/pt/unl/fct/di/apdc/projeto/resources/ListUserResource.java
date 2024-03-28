@@ -13,7 +13,6 @@ import javax.ws.rs.core.Response.*;
 import com.google.cloud.datastore.*;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
-import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 
 @Path("/list")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

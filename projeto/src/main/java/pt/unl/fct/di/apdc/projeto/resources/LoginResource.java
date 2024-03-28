@@ -51,7 +51,7 @@ public class LoginResource {
 	public LoginResource() {
 	}
 	
-	@POST
+	/*@POST
 	@Path("/v1")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response loginV1(LoginData data) {
@@ -225,7 +225,7 @@ public class LoginResource {
 								new Date(System.currentTimeMillis() - HOURS24)))))
 						.setOrderBy(OrderBy.desc("created"))
 						.build();
-				QueryResults<Entity> logs = txn.run(query);*/
+				QueryResults<Entity> logs = txn.run(query);
 				txn.commit();
 				LOG.info("User '" + data.username + "' logged in successfully.");
 				return Response.ok(g.toJson(timestamps)).build();
@@ -244,5 +244,79 @@ public class LoginResource {
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 		}
+	}*/
+
+	@POST
+	@Path("/")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response login(LoginData data) {
+		LOG.fine("Login: login attempt by: " + data.username + ".");
+		Key userKey = userKeyFactory.newKey(data.username);
+		Key statsKey = datastore.newKeyFactory()
+				.addAncestor(PathElement.of("User", data.username))
+				.setKind("LoginStats").newKey("counters");
+		Transaction txn = datastore.newTransaction();
+		try {
+			Entity user = txn.get(userKey);
+			if ( user == null ) {
+				LOG.warning("Login: " + data.username + " not registered as user.");
+				txn.rollback();
+				return Response.status(Status.NOT_FOUND).entity("No such user exists.").build();
+			}
+			Entity stats = txn.get(statsKey);
+			if ( stats == null ) {
+				stats = Entity.newBuilder(statsKey)
+						.set("successfulLogins", 0L)
+						.set("failedLogins", 0L)
+						.set("userFirstLogin", Timestamp.now())
+						.set("userLastLogin", Timestamp.now())
+						.build();
+			}
+			String hashedPassword = (String) user.getString("password");
+			if ( hashedPassword.equals(DigestUtils.sha3_512Hex(data.password)) ) {
+				AuthToken token = new AuthToken(data.username, user.getString("role"));
+				Entity loginStats = Entity.newBuilder(statsKey)
+						.set("successfulLogins", 1L + stats.getLong("successfulLogins"))
+						.set("failedLogins", stats.getLong("failedLogins"))
+						.set("userFirstLogin", stats.getTimestamp("userFirstLogin"))
+						.set("userLastLogin", Timestamp.now())
+						.build();
+				user = Entity.newBuilder(userKey).set("tokenID", token.tokenID).build();
+				txn.update(loginStats, user);
+				txn.commit();
+				LOG.info("Login: " + data.username + " logged in successfully.");
+				return Response.ok(g.toJson(token)).build();
+			} else {
+				Entity userStats = Entity.newBuilder(statsKey)
+						.set("successfulLogins", stats.getLong("successfulLogins"))
+						.set("failedLogins", 1L + stats.getLong("failedLogins"))
+						.set("userFirstLogin", stats.getTimestamp("userFirstLogin"))
+						.set("userLastLogin", stats.getTimestamp("userLastLogin"))
+						.set("lastLoginAttempt", Timestamp.now())
+						.build();
+				txn.put(userStats);
+				txn.commit();
+				LOG.warning("Login: " + data.username + " provided wrong password.");
+				return Response.status(Status.UNAUTHORIZED).entity("Wrong password.").build();
+			}
+		} catch ( Exception e ) {
+			txn.rollback();
+			LOG.severe("Login: " + e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		} finally {
+			if ( txn.isActive() ) {
+				txn.rollback();
+                LOG.severe("Login: Internal server error.");
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+	}
+
+	@POST
+	@Path("/token")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response getToken(AuthToken token) {
+		LOG.fine("Token: token display attempt by: " + token.username + ".");
+		return Response.ok(g.toJson(token)).build();
 	}
 }
