@@ -34,7 +34,7 @@ public class LogoutResource {
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response alterData(AuthToken token) {
+    public Response logout(AuthToken token) {
         LOG.fine("Logout: " + token.username + " attempt to logout.");
         Transaction txn = datastore.newTransaction();
         try {

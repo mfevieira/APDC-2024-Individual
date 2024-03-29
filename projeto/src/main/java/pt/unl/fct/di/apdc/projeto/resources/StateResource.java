@@ -38,6 +38,7 @@ public class StateResource {
     public Response changeState(String username, AuthToken token) {
         LOG.fine("State changing attempt of: " + username + " by " + token.username);
         if ( token.role.equals(UserConstants.USER) ) {
+            LOG.warning("State change: unauthorized attempt to change the state of a user.");
             return Response.status(Status.UNAUTHORIZED).entity("USER roles cannot change any user states.").build();
         }
         Transaction txn = datastore.newTransaction();

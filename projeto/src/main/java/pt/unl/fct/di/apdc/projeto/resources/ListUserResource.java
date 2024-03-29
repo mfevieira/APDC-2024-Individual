@@ -46,7 +46,6 @@ public class ListUserResource {
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response listUsers(AuthToken token) {
-        // TODO: Make the lists
         LOG.fine("List users: " + token.username + " attempted to list users.");
         try {
             Key userKey = userKeyFactory.newKey(token.username);

@@ -57,8 +57,10 @@ public class RegisterData extends LoginData {
 	 * @return true if the name is invalid, false otherwise.
 	 */
 	protected boolean invalidName() {
+		if ( this.name == null )
+			return true;
 		String[] name = this.name.split(" ");
-		if ( name.length < 2 || this.name == null )
+		if ( name.length < 2 )
 			return true;
 		return false;
 	}
