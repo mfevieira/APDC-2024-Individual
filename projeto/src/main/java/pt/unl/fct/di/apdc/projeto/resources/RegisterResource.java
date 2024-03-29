@@ -17,8 +17,6 @@ import com.google.cloud.datastore.*;
 import com.google.gson.Gson;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
-import pt.unl.fct.di.apdc.projeto.util.LoginData;
-import pt.unl.fct.di.apdc.projeto.util.RegisterData;
 import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 import pt.unl.fct.di.apdc.projeto.util.OptionalRegisterData;
 
@@ -124,11 +122,12 @@ public class RegisterResource {
 			if (txn.get(userKey) == null) {
 				AuthToken token = new AuthToken(data.username, UserConstants.USER);
 				Entity user = Entity.newBuilder(userKey)
+						.set("username", data.username)
 						.set("password", DigestUtils.sha3_512Hex(data.password))
 						.set("email", data.email)
 						.set("name", data.name)
 						.set("phone", data.phone)
-						.set("profile", data.profile == null ? UserConstants.INACTIVE : data.profile)
+						.set("profile", data.profile == null ? UserConstants.PRIVATE : data.profile)
 						.set("work", data.work == null ? "" : data.work)
 						.set("workplace", data.workPlace == null ? "" : data.workPlace)
 						.set("address", data.address == null ? "" : data.address)
@@ -137,7 +136,7 @@ public class RegisterResource {
 						.set("role", UserConstants.USER)
 						.set("state", UserConstants.INACTIVE)
 						.set("userCreationTime", Timestamp.now())
-						.set("tokenID", token.tokenID)
+						.set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
 						.build();
 				txn.add(user);
 				txn.commit();

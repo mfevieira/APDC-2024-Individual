@@ -1,6 +1,41 @@
 indexes:
-- kind: UserLog
+- kind: LoginStats
   ancestor: yes
   properties:
-  - name: loginTime
+  - name: successfulLogins
+    direction: desc
+  - name: failedLogins
+    direction: desc
+  - name: suserFirstLogin
+    direction: desc
+  - name: userLastLogin
+    direction: desc
+- kind: User
+  ancestor: no
+  properties:
+  - name: username
+    direction: desc
+  - name: email
+    direction: desc
+  - name: name
+    direction: desc
+  - name: phone
+    direction: desc
+  - name: profile
+    direction: desc
+  - name: work
+    direction: desc
+  - name: workplace
+    direction: desc
+  - name: address
+    direction: desc
+  - name: postalCode
+    direction: desc
+  - name: fiscal
+    direction: desc
+  - name: role
+    direction: desc
+  - name: state
+    direction: desc
+  - name: userCreationTime
     direction: desc

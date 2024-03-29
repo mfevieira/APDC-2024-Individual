@@ -14,13 +14,17 @@ public class OptionalRegisterData extends RegisterData {
 
     public String fiscal;
 
+    public String role;
+
+    public String state;
+
     //public File photo;
     
     public OptionalRegisterData() {
 
     }
 
-    public OptionalRegisterData(String username, String password, String confirmation, String email, String name, String phone, String profile, String work, String workPlace, String address, String postalCode, String fiscal) {
+    public OptionalRegisterData(String username, String password, String confirmation, String email, String name, String phone, String profile, String work, String workPlace, String address, String postalCode, String fiscal, String role, String state) {
         super(username, password, confirmation, email, name, phone);
         this.profile = profile;
         this.work = work;
@@ -28,6 +32,8 @@ public class OptionalRegisterData extends RegisterData {
         this.address = address;
         this.postalCode = postalCode;
         this.fiscal = fiscal;
+        this.role = role;
+        this.state = state;
     }
 
     /**

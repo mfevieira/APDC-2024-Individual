@@ -9,15 +9,15 @@ public class AuthToken {
 	public String username;
 	public String role;
 	public String tokenID;
-	public long creationData;
-	public long expirationData;
+	public long creationDate;
+	public long expirationDate;
 	
 	public AuthToken(String username, String role) {
 		this.username = username;
 		this.role = role;
 		this.tokenID = UUID.randomUUID().toString();
-		this.creationData = System.currentTimeMillis();
-		this.expirationData = this.creationData + AuthToken.EXPIRATION_TIME;
+		this.creationDate = System.currentTimeMillis();
+		this.expirationDate = this.creationDate + AuthToken.EXPIRATION_TIME;
 	}
 
 	/**
@@ -31,7 +31,7 @@ public class AuthToken {
 			return -2;
 		} else if ( !role.equals(this.role) ) {
 			return -1;
-		} else if ( System.currentTimeMillis() >= this.expirationData ) {
+		} else if ( System.currentTimeMillis() >= this.expirationDate ) {
 			return 0;
 		} else {
 			return 1;
