@@ -22,7 +22,7 @@ public class Main {
 	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
 
     public static void main(String[] args) {
-        LOG.fine("Resgister: attempt to register root user.");
+        LOG.fine("Startup: attempt to register root user.");
 		Transaction txn = datastore.newTransaction();
 		try {
 			Key userKey = userKeyFactory.newKey("root");
@@ -47,18 +47,18 @@ public class Main {
 						.build();
 				txn.add(user);
 				txn.commit();
-				LOG.fine("Register: root user was registered in the database.");
+				LOG.fine("Startup: root user was registered in the database.");
 			} else {
 				txn.rollback();
-				LOG.fine("Register: root user already registered.");
+				LOG.fine("Startup: root user already registered.");
 			}
 		} catch ( Exception e ) {
 			txn.rollback();
-			LOG.severe("Register: " + e.getMessage());
+			LOG.severe("Startup: " + e.getMessage());
 		} finally {
 			if (txn.isActive()) {
 				txn.rollback();
-                LOG.severe("Register: Internal server error.");
+                LOG.severe("Startup: Internal server error.");
 			}
 		}
     }
