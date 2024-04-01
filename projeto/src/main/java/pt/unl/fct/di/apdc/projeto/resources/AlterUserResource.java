@@ -20,7 +20,8 @@ import pt.unl.fct.di.apdc.projeto.util.OptionalRegisterData;
 import pt.unl.fct.di.apdc.projeto.util.PasswordData;
 import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 
-@Path("/change")
+@Path("/alter")
+@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class AlterUserResource {
     
@@ -42,7 +43,6 @@ public class AlterUserResource {
 
     @POST
     @Path("/data")
-    @Consumes(MediaType.APPLICATION_JSON)
     public Response alterData(OptionalRegisterData data, AuthToken token) {
         LOG.fine("Data change: " + token.username + " attempted to change their data.");
         if ( token.role.equals(UserConstants.USER) && !data.username.equals(token.username) ) {
@@ -193,7 +193,6 @@ public class AlterUserResource {
 
     @POST
     @Path("/password")
-    @Consumes(MediaType.APPLICATION_JSON)
     public Response alterPassword(PasswordData data, AuthToken token) {
         LOG.fine("Password change: " + token.username + " attempted to change their password.");
         if ( !data.validPasswordData() ) {

@@ -21,6 +21,7 @@ import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 import pt.unl.fct.di.apdc.projeto.util.OptionalRegisterData;
 
 @Path("/register")
+@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RegisterResource {
 
@@ -41,7 +42,6 @@ public class RegisterResource {
 
 	@POST
 	@Path("/")
-	@Consumes(MediaType.APPLICATION_JSON)
 	public Response register(OptionalRegisterData data) {
 		LOG.fine("Resgister: attempt to register " + data.username + ".");
 		if (!data.validRegistration()) {

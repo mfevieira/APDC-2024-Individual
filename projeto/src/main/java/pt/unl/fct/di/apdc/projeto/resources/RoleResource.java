@@ -13,9 +13,11 @@ import javax.ws.rs.core.Response.*;
 import com.google.cloud.datastore.*;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
+import pt.unl.fct.di.apdc.projeto.util.RoleData;
 import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 
 @Path("/role")
+@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RoleResource {
 
@@ -33,17 +35,16 @@ public class RoleResource {
 
     @POST
     @Path("/")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response changeRole(String username, String role, AuthToken token) {
-        LOG.fine("Role change: attempt to change role of " + username + " by " + token.username + ".");
+    public Response changeRole(RoleData data, AuthToken token) {
+        LOG.fine("Role change: attempt to change role of " + data.username + " by " + token.username + ".");
         if ( token.role.equals(UserConstants.USER) || token.role.equals(UserConstants.GBO) || 
-            ( token.role.equals(UserConstants.GA) && (role.equals(UserConstants.GA) || role.equals(UserConstants.SU) ) ) ) {
+            ( token.role.equals(UserConstants.GA) && (data.role.equals(UserConstants.GA) || data.role.equals(UserConstants.SU) ) ) ) {
             LOG.warning("Role change: unauthorized attempt to change the role of a user.");
             return Response.status(Status.UNAUTHORIZED).entity("User is not authorized to change user accounts role.").build();
         }
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = userKeyFactory.newKey(username);
+            Key userKey = userKeyFactory.newKey(data.username);
             Key adminKey = userKeyFactory.newKey(token.username);
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
@@ -56,7 +57,7 @@ public class RoleResource {
                 LOG.warning("Role change: User is not registered.");
                 return Response.status(Status.NOT_FOUND).entity("User is not registered.").build();
             }
-            if ( user.getString("role").equals(role) ) {
+            if ( user.getString("role").equals(data.role) ) {
                 txn.rollback();
                 LOG.fine("Role change: User already has the same role.");
                 return Response.status(Status.NOT_MODIFIED).entity("User already had the same role, role remains unchanged.").build();
@@ -64,10 +65,10 @@ public class RoleResource {
             String adminRole = admin.getString("role");
             int validation = token.isStillValid(admin.getString("tokenID"), adminRole);
             if ( validation == 1 ) {
-                user = Entity.newBuilder(user).set("role", role).build();
+                user = Entity.newBuilder(user).set("role", data.role).build();
                 txn.update(user);
                 txn.commit();
-                LOG.fine("Role change: " + username + "'s' role was changed to " + role + ".");
+                LOG.fine("Role change: " + data.username + "'s' role was changed to " + data.role + ".");
                 return Response.ok().entity("User's role changed.").build();
             } else if (validation == 0 ) {
                 // TODO: Send the admin back to the login page

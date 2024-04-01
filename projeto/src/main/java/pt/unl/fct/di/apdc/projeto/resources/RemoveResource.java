@@ -13,9 +13,11 @@ import javax.ws.rs.core.Response.*;
 import com.google.cloud.datastore.*;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
+import pt.unl.fct.di.apdc.projeto.util.UsernameData;
 import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 
 @Path("/remove")
+@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RemoveResource {
 
@@ -34,18 +36,17 @@ public class RemoveResource {
     
     @POST
     @Path("/")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response removeUser(String username, AuthToken token) {
-        LOG.fine("Remove User: removal attempt of " + username + " by " + token.username + ".");
-        if ( token.role.equals(UserConstants.GBO) || ( token.role.equals(UserConstants.USER) && !token.username.equals(username) ) ) {
+    public Response removeUser(UsernameData data, AuthToken token) {
+        LOG.fine("Remove User: removal attempt of " + data.username + " by " + token.username + ".");
+        if ( token.role.equals(UserConstants.GBO) || ( token.role.equals(UserConstants.USER) && !token.username.equals(data.username) ) ) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = userKeyFactory.newKey(username);
+            Key userKey = userKeyFactory.newKey(data.username);
             Key adminKey = userKeyFactory.newKey(token.username);
             Key statsKey = datastore.newKeyFactory()
-                    .addAncestor(PathElement.of("User", username))
+                    .addAncestor(PathElement.of("User", data.username))
                     .setKind("LoginStats").newKey("counters");
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
@@ -55,7 +56,7 @@ public class RemoveResource {
                 return Response.status(Status.NOT_FOUND).entity("No such user exists.").build();
             } else if ( user == null ) {
                 txn.rollback();
-				LOG.warning("Remove User: " + username + " not registered as user.");
+				LOG.warning("Remove User: " + data.username + " not registered as user.");
                 return Response.status(Status.NOT_FOUND).entity("No such user exists.").build();
             }
             String adminRole = admin.getString("role");
@@ -83,7 +84,7 @@ public class RemoveResource {
                 }
                 txn.delete(userKey, statsKey);
                 txn.commit();
-                LOG.fine("Remove User: " + username + " removed from the database.");
+                LOG.fine("Remove User: " + data.username + " removed from the database.");
                 return Response.ok().entity("User removed from database.").build();
             } else if (validation == 0 ) {
                 // TODO: Send the admin back to the login page

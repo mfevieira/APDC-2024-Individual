@@ -20,6 +20,7 @@ import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.LoginData;
 
 @Path("/login")
+@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LoginResource {
 
@@ -45,7 +46,6 @@ public class LoginResource {
 
 	@POST
 	@Path("/")
-	@Consumes(MediaType.APPLICATION_JSON)
 	public Response login(LoginData data) {
 		LOG.fine("Login: login attempt by: " + data.username + ".");
 		Key userKey = userKeyFactory.newKey(data.username);

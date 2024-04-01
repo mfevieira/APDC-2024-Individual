@@ -14,8 +14,10 @@ import com.google.cloud.datastore.*;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.UserConstants;
+import pt.unl.fct.di.apdc.projeto.util.UsernameData;
 
 @Path("/state")
+@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class StateResource {
  
@@ -34,16 +36,15 @@ public class StateResource {
 
     @POST
     @Path("/")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response changeState(String username, AuthToken token) {
-        LOG.fine("State changing attempt of: " + username + " by " + token.username);
+    public Response changeState(UsernameData data, AuthToken token) {
+        LOG.fine("State changing attempt of: " + data.username + " by " + token.username);
         if ( token.role.equals(UserConstants.USER) ) {
             LOG.warning("State change: unauthorized attempt to change the state of a user.");
             return Response.status(Status.UNAUTHORIZED).entity("USER roles cannot change any user states.").build();
         }
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = userKeyFactory.newKey(username);
+            Key userKey = userKeyFactory.newKey(data.username);
             Key adminKey = userKeyFactory.newKey(token.username);
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
@@ -53,7 +54,7 @@ public class StateResource {
                 return Response.status(Status.NOT_FOUND).entity("Admin is not registered as a user.").build();
             } else if ( user == null ) {
                 txn.rollback();
-				LOG.warning("State change: " + username + " not registered as user.");
+				LOG.warning("State change: " + data.username + " not registered as user.");
                 return Response.status(Status.NOT_FOUND).entity("User is not registered as a user.").build();
             }
             String adminRole = admin.getString("role");
@@ -98,7 +99,7 @@ public class StateResource {
                 }
                 txn.update(user);
                 txn.commit();
-                LOG.fine("State change: " + username + "'s role changed by " + token.username + ".");
+                LOG.fine("State change: " + data.username + "'s role changed by " + token.username + ".");
                 return Response.ok().entity("User state changed.").build();
             } else if (validation == 0 ) {
                 // TODO: Send the admin back to the login page

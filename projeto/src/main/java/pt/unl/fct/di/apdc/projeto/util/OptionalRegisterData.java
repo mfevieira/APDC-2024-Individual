@@ -18,7 +18,7 @@ public class OptionalRegisterData extends RegisterData {
 
     public String state;
 
-    //public File photo;
+    //public String photo;
     
     public OptionalRegisterData() {
 
