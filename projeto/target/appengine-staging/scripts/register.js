@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.forEach(function(value, key) {
             jsonData[key] = value;
         });
+        jsonData["role"] = "";
+        jsonData["state"] = "";
 
         // Convert JSON object to string
         var jsonString = JSON.stringify(jsonData);
@@ -19,36 +21,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function sendDataToServer(jsonData) {
-        // Send jsonData to the server using XHR or Fetch API
-        // Example using Fetch API:
-        fetch('/rest/register', {
+        fetch('https://apdc-64320.oa.r.appspot.com/rest/register/v1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: jsonData
         })
-        .then(response => {
+        .then(async response => {
             if (response.ok) {
-                return response.json().then(data => {
-                    // Extract token and message from the JSON data
-                    var authToken = data.authToken;
-                    var message = data.message;
-        
-                    // Use authToken and message as needed
-                    localStorage.setItem("authToken", authToken);
-                    console.log('Message:', message);
-                });
+                const data = await response.json();
+                localStorage.setItem("authToken", data);
             } else {
-                // Response is not successful
-                return response.text().then(errorMessage => {
-                    console.error('Error:', errorMessage);
-                });
+                const errorMessage = await response.text();
+                console.error('Fetch error:', errorMessage);
             }
-        })
-        .catch(error => {
-            // Handle fetch error
-            console.error('Fetch error:', error);
         });
     }
 });

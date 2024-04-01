@@ -23,8 +23,6 @@ import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 import pt.unl.fct.di.apdc.projeto.util.UserQuery;
 
 @Path("/list")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ListUserResource {
     
     /** Logger Object */
@@ -44,7 +42,9 @@ public class ListUserResource {
     }
 
     @POST
-    @Path("/")
+    @Path("/users")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response listUsers(AuthToken token) {
         LOG.fine("List users: " + token.username + " attempted to list users.");
         try {

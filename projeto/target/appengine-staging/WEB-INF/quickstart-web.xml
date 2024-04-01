@@ -41,7 +41,7 @@
     </init-param>
     <init-param origin="WebDescriptor(file:///D:/Users/Miguel%20Vieira/Documents/GitHub/APDC-2024-Individual/projeto/target/appengine-staging/WEB-INF/web.xml):3">
       <param-name>jersey.config.server.provider.packages</param-name>
-      <param-value>pt.unl.fct.di.apdc.firstwebapp.resources</param-value>
+      <param-value>pt.unl.fct.di.apdc.projeto.resources</param-value>
     </init-param>
     <init-param origin="WebDescriptor(file:///D:/Users/Miguel%20Vieira/Documents/GitHub/APDC-2024-Individual/projeto/target/appengine-staging/WEB-INF/web.xml):4">
       <param-name>jersey.config.servlet.filter.contextPath</param-name>

@@ -70,7 +70,7 @@
                   
             <param-name>jersey.config.server.provider.packages</param-name>
                   
-            <param-value>pt.unl.fct.di.apdc.firstwebapp.resources</param-value>
+            <param-value>pt.unl.fct.di.apdc.projeto.resources</param-value>
                 
         </init-param>
             

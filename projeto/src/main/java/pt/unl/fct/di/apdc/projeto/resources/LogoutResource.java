@@ -15,8 +15,6 @@ import com.google.cloud.datastore.*;
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 
 @Path("/logout")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LogoutResource {
     
     /** Logger Object */
@@ -33,7 +31,9 @@ public class LogoutResource {
     }
 
     @POST
-    @Path("/")
+    @Path("/user")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response logout(AuthToken token) {
         LOG.fine("Logout: " + token.username + " attempt to logout.");
         Transaction txn = datastore.newTransaction();

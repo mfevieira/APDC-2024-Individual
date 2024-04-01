@@ -20,8 +20,6 @@ import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.LoginData;
 
 @Path("/login")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LoginResource {
 
 	/**
@@ -45,7 +43,9 @@ public class LoginResource {
 	}
 
 	@POST
-	@Path("/")
+	@Path("/user")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public Response login(LoginData data) {
 		LOG.fine("Login: login attempt by: " + data.username + ".");
 		Key userKey = userKeyFactory.newKey(data.username);
@@ -112,6 +112,7 @@ public class LoginResource {
 	@POST
 	@Path("/token")
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public Response getToken(AuthToken token) {
 		LOG.fine("Token: token display attempt by: " + token.username + ".");
 		return Response.ok(g.toJson(token)).build();

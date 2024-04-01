@@ -7,7 +7,7 @@
     <groupId>projeto</groupId>
     <artifactId>projeto</artifactId>
     <version>0.0.1</version>
-  <packaging>war</packaging>
+  	<packaging>war</packaging>
 
     <properties>
 		<appengine.maven.plugin.version>2.4.0</appengine.maven.plugin.version>

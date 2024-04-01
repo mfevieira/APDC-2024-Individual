@@ -17,8 +17,6 @@ import pt.unl.fct.di.apdc.projeto.util.UsernameData;
 import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 
 @Path("/remove")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class RemoveResource {
 
     /** Logger Object */
@@ -35,7 +33,9 @@ public class RemoveResource {
     }
     
     @POST
-    @Path("/")
+    @Path("/user")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response removeUser(UsernameData data, AuthToken token) {
         LOG.fine("Remove User: removal attempt of " + data.username + " by " + token.username + ".");
         if ( token.role.equals(UserConstants.GBO) || ( token.role.equals(UserConstants.USER) && !token.username.equals(data.username) ) ) {
