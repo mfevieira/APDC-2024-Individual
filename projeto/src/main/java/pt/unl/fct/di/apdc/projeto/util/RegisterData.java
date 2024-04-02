@@ -53,14 +53,43 @@ public class RegisterData {
 	
 	/**
 	 * Method to check if the data is valid for registry.
-	 * @return true if all the data fields are not null and the password and confirmation password are the same, false otherwise.
+	 * @return 	-8 if the username is invalid;
+	 * 			-7 if the phone is invalid;
+	 * 			-6 if the email is invalid;
+	 * 			-5 if the name is invalid;
+	 * 			-4 if the password is invalid;
+	 * 			-3 if the profile is invalid;
+	 * 			-2 if the postal code is invalid;
+	 * 			-1 if the fiscal number is invalid;
+	 * 			0 if everything is valid.
 	 */
-	public boolean validRegistration() {
-		if ( this.username == null || this.username.trim().isEmpty() || this.phone == null || this.phone.trim().isEmpty() || this.invalidEmail() || this.invalidName() || this.invalidPassword() || this.invalidOptionals() ) {
-			return false;
-		} else {
-			return true;
+	public int validRegistration() {
+		if ( this.username == null || this.username.trim().isEmpty() ) {
+			return -8;
+		} else if ( this.phone == null || this.phone.trim().isEmpty() ) {
+			return -7;
+		} else if ( this.invalidEmail() ) {
+			return -6;
+		} else if ( this.invalidName() ) {
+			return -5;
+		} else if ( this.invalidPassword() ) {
+			return -4;
 		}
+		if ( this.profile != null && !this.profile.isEmpty() ) {
+			if ( !this.profile.equals("PUBLIC") && !this.profile.equals("PRIVATE") ) {
+				return -3;
+			}
+		}
+		if ( this.postalCode != null && !this.postalCode.isEmpty() ) {
+			String[] format = this.postalCode.split("-");
+			if ( format.length != 2 || format[0].length() != 4 || format[1].length() != 3 )
+				return -2;
+		}
+		if ( this.fiscal != null && !this.fiscal.isEmpty() ) {
+			if ( this.fiscal.length() != 9 )
+				return -1;
+		}
+		return 0;
 	}
 
 	/**
@@ -141,25 +170,22 @@ public class RegisterData {
 		return true;
 	}
 
-    /**
-     * Method to check if the optional registry data supplied is invalid.
-     * @return true if the optional data is invalid, false otherwise.
-     */
-    protected boolean invalidOptionals() {
-        if ( this.profile != null ) {
-            if ( !this.profile.equals("PUBLIC") && !this.profile.equals("PRIVATE") ) {
-                return true;
-            }
-        }
-        if ( this.postalCode != null ) {
-            String[] format = this.postalCode.split("-");
-            if ( format.length != 2 || format[0].length() != 4 || format[1].length() != 3 )
-                return true;
-        }
-        if ( this.fiscal != null ) {
-            if ( this.fiscal.length() != 9 )
-                return true;
-        }
-        return false;
-    }
+	/**
+	 * Method to get the reason for the register data being invalid.
+	 * @param code the error code.
+	 * @return the message with the reason for the register data being invalid.
+	 */
+    public String getInvalidReason(int code) {
+		switch(code) {
+			case -8: return "username";
+			case -7: return "phone";
+			case -6: return "email";
+			case -5: return "name";
+			case -4: return "password";
+			case -3: return "profile";
+			case -2: return "postal code";
+			case -1: return "fiscal number";
+			default: return "unknown system error";
+		}
+	}
 }

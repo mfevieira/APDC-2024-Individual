@@ -72,13 +72,21 @@ public class ChangeUserResource {
             if ( validation == 1 ) {
                 if ( adminRole.equals(UserConstants.USER) ) {
                     Entity newUser = Entity.newBuilder(user)
-						.set("phone", data.phone == null ? user.getString("phone") : data.phone)
-						.set("profile", data.profile == null ? user.getString("profile") : data.profile)
-						.set("work", data.work == null ? user.getString("work") : data.work)
-						.set("workplace", data.workPlace == null ? user.getString("workPlace") : data.workPlace)
-						.set("address", data.address == null ? user.getString("address") : data.address)
-						.set("postalCode", data.postalCode == null ? user.getString("postalCode") : data.postalCode)
-						.set("fiscal", data.fiscal == null ? user.getString("fiscal") : data.fiscal)
+                            .set("username", user.getString("username"))
+                            .set("password", data.password == null || data.password.isEmpty() ? user.getString("password") : DigestUtils.sha3_512Hex(data.password))
+                            .set("email", user.getString("email"))
+                            .set("name", user.getString("name"))
+                            .set("phone", data.phone == null || data.phone.isEmpty() ? user.getString("phone") : data.phone)
+                            .set("profile", data.profile == null || data.profile.isEmpty() ? user.getString("profile") : data.profile)
+                            .set("work", data.work == null || data.work.isEmpty() ? user.getString("work") : data.work)
+                            .set("workplace", data.workPlace == null || data.workPlace.isEmpty() ? user.getString("workPlace") : data.workPlace)
+                            .set("address", data.address == null || data.address.isEmpty() ? user.getString("address") : data.address)
+                            .set("postalCode", data.postalCode == null || data.postalCode.isEmpty() ? user.getString("postalCode") : data.postalCode)
+                            .set("fiscal", data.fiscal == null || data.fiscal.isEmpty() ? user.getString("fiscal") : data.fiscal)
+                            .set("role", user.getString("role"))
+                            .set("state", user.getString("state"))
+                            .set("userCreationTime", user.getTimestamp("userCreationTime"))
+                            .set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
 						.build();
                     txn.update(newUser);
                     txn.commit();
@@ -86,21 +94,24 @@ public class ChangeUserResource {
                     return Response.ok().entity("User's data updated.").build();
                 } else if ( adminRole.equals(UserConstants.GBO) ) {
                     if ( user.getString("role").equals(UserConstants.USER) ) {
-                        Entity newUser = Entity.newBuilder(user)
-                                .set("password", data.password == null ? user.getString("password") : DigestUtils.sha3_512Hex(data.password))
-                                .set("email", data.email == null ? user.getString("email") : data.email)
-                                .set("name", data.name == null ? user.getString("name") : data.name)
-                                .set("phone", data.phone == null ? user.getString("phone") : data.phone)
-                                .set("profile", data.profile == null ? user.getString("profile") : data.profile)
-                                .set("work", data.work == null ? user.getString("work") : data.work)
-                                .set("workplace", data.workPlace == null ? user.getString("workPlace") : data.workPlace)
-                                .set("address", data.address == null ? user.getString("address") : data.address)
-                                .set("postalCode", data.postalCode == null ? user.getString("postalCode") : data.postalCode)
-                                .set("fiscal", data.fiscal == null ? user.getString("fiscal") : data.fiscal)
-                                .set("role", data.role == null ? user.getString("role") : data.role)
-                                .set("state", data.state == null ? user.getString("state") : data.state)
+                        user = Entity.newBuilder(user)
+                                .set("username", user.getString("username"))
+                                .set("password", data.password == null || data.password.isEmpty() ? user.getString("password") : DigestUtils.sha3_512Hex(data.password))
+                                .set("email", data.email == null || data.email.isEmpty() ? user.getString("email") : data.email)
+                                .set("name", data.name == null || data.name.isEmpty() ? user.getString("name") : data.name)
+                                .set("phone", data.phone == null || data.phone.isEmpty() ? user.getString("phone") : data.phone)
+                                .set("profile", data.profile == null || data.profile.isEmpty() ? user.getString("profile") : data.profile)
+                                .set("work", data.work == null || data.work.isEmpty() ? user.getString("work") : data.work)
+                                .set("workplace", data.workPlace == null || data.workPlace.isEmpty() ? user.getString("workPlace") : data.workPlace)
+                                .set("address", data.address == null || data.address.isEmpty() ? user.getString("address") : data.address)
+                                .set("postalCode", data.postalCode == null || data.postalCode.isEmpty() ? user.getString("postalCode") : data.postalCode)
+                                .set("fiscal", data.fiscal == null || data.fiscal.isEmpty() ? user.getString("fiscal") : data.fiscal)
+                                .set("role", data.role == null || data.role.isEmpty() ? user.getString("role") : data.role)
+                                .set("state", data.state == null || data.state.isEmpty() ? user.getString("state") : data.state)
+                                .set("userCreationTime", user.getTimestamp("userCreationTime"))
+                                .set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
                                 .build();
-                        txn.update(newUser);
+                        txn.update(user);
                         txn.commit();
                         LOG.fine("Data change: " + data.username + "'s data was updated in the database.");
                         return Response.ok().entity("User's data updated.").build();
@@ -111,21 +122,24 @@ public class ChangeUserResource {
                     }
                 } else if ( adminRole.equals(UserConstants.GA) ) {
                     if ( user.getString("role").equals(UserConstants.USER) || user.getString("role").equals(UserConstants.GBO) ) {
-                        Entity newUser = Entity.newBuilder(user)
-                                .set("password", data.password == null ? user.getString("password") : DigestUtils.sha3_512Hex(data.password))
-                                .set("email", data.email == null ? user.getString("email") : data.email)
-                                .set("name", data.name == null ? user.getString("name") : data.name)
-                                .set("phone", data.phone == null ? user.getString("phone") : data.phone)
-                                .set("profile", data.profile == null ? user.getString("profile") : data.profile)
-                                .set("work", data.work == null ? user.getString("work") : data.work)
-                                .set("workplace", data.workPlace == null ? user.getString("workPlace") : data.workPlace)
-                                .set("address", data.address == null ? user.getString("address") : data.address)
-                                .set("postalCode", data.postalCode == null ? user.getString("postalCode") : data.postalCode)
-                                .set("fiscal", data.fiscal == null ? user.getString("fiscal") : data.fiscal)
-                                .set("role", data.role == null ? user.getString("role") : data.role)
-                                .set("state", data.state == null ? user.getString("state") : data.state)
+                        user = Entity.newBuilder(user)
+                                .set("username", user.getString("username"))
+                                .set("password", data.password == null || data.password.isEmpty() ? user.getString("password") : DigestUtils.sha3_512Hex(data.password))
+                                .set("email", data.email == null || data.email.isEmpty() ? user.getString("email") : data.email)
+                                .set("name", data.name == null || data.name.isEmpty() ? user.getString("name") : data.name)
+                                .set("phone", data.phone == null || data.phone.isEmpty() ? user.getString("phone") : data.phone)
+                                .set("profile", data.profile == null || data.profile.isEmpty() ? user.getString("profile") : data.profile)
+                                .set("work", data.work == null || data.work.isEmpty() ? user.getString("work") : data.work)
+                                .set("workplace", data.workPlace == null || data.workPlace.isEmpty() ? user.getString("workPlace") : data.workPlace)
+                                .set("address", data.address == null || data.address.isEmpty() ? user.getString("address") : data.address)
+                                .set("postalCode", data.postalCode == null || data.postalCode.isEmpty() ? user.getString("postalCode") : data.postalCode)
+                                .set("fiscal", data.fiscal == null || data.fiscal.isEmpty() ? user.getString("fiscal") : data.fiscal)
+                                .set("role", data.role == null || data.role.isEmpty() ? user.getString("role") : data.role)
+                                .set("state", data.state == null || data.state.isEmpty() ? user.getString("state") : data.state)
+                                .set("userCreationTime", user.getTimestamp("userCreationTime"))
+                                .set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
                                 .build();
-                        txn.update(newUser);
+                        txn.update(user);
                         txn.commit();
                         LOG.fine("Data change: " + data.username + "'s data was updated in the database.");
                         return Response.ok().entity("User's data updated.").build();
@@ -136,21 +150,24 @@ public class ChangeUserResource {
                     }
                 } else if ( adminRole.equals(UserConstants.SU) ) {
                     if ( user.getString("role").equals(UserConstants.USER) || user.getString("role").equals(UserConstants.GBO) || user.getString("role").equals(UserConstants.GA) ) {
-                        Entity newUser = Entity.newBuilder(user)
-                                .set("password", data.password == null ? user.getString("password") : DigestUtils.sha3_512Hex(data.password))
-                                .set("email", data.email == null ? user.getString("email") : data.email)
-                                .set("name", data.name == null ? user.getString("name") : data.name)
-                                .set("phone", data.phone == null ? user.getString("phone") : data.phone)
-                                .set("profile", data.profile == null ? user.getString("profile") : data.profile)
-                                .set("work", data.work == null ? user.getString("work") : data.work)
-                                .set("workplace", data.workPlace == null ? user.getString("workPlace") : data.workPlace)
-                                .set("address", data.address == null ? user.getString("address") : data.address)
-                                .set("postalCode", data.postalCode == null ? user.getString("postalCode") : data.postalCode)
-                                .set("fiscal", data.fiscal == null ? user.getString("fiscal") : data.fiscal)
-                                .set("role", data.role == null ? user.getString("role") : data.role)
-                                .set("state", data.state == null ? user.getString("state") : data.state)
+                        user = Entity.newBuilder(user)
+                                .set("username", user.getString("username"))
+                                .set("password", data.password == null || data.password.isEmpty() ? user.getString("password") : DigestUtils.sha3_512Hex(data.password))
+                                .set("email", data.email == null || data.email.isEmpty() ? user.getString("email") : data.email)
+                                .set("name", data.name == null || data.name.isEmpty() ? user.getString("name") : data.name)
+                                .set("phone", data.phone == null || data.phone.isEmpty() ? user.getString("phone") : data.phone)
+                                .set("profile", data.profile == null || data.profile.isEmpty() ? user.getString("profile") : data.profile)
+                                .set("work", data.work == null || data.work.isEmpty() ? user.getString("work") : data.work)
+                                .set("workplace", data.workPlace == null || data.workPlace.isEmpty() ? user.getString("workPlace") : data.workPlace)
+                                .set("address", data.address == null || data.address.isEmpty() ? user.getString("address") : data.address)
+                                .set("postalCode", data.postalCode == null || data.postalCode.isEmpty() ? user.getString("postalCode") : data.postalCode)
+                                .set("fiscal", data.fiscal == null || data.fiscal.isEmpty() ? user.getString("fiscal") : data.fiscal)
+                                .set("role", data.role == null || data.role.isEmpty() ? user.getString("role") : data.role)
+                                .set("state", data.state == null || data.state.isEmpty() ? user.getString("state") : data.state)
+                                .set("userCreationTime", user.getTimestamp("userCreationTime"))
+                                .set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
                                 .build();
-                        txn.update(newUser);
+                        txn.update(user);
                         txn.commit();
                         LOG.fine("Data change: " + data.username + "'s data was updated in the database.");
                         return Response.ok().entity("User's data updated.").build();
@@ -222,13 +239,26 @@ public class ChangeUserResource {
                     String username = token.username;
                     token = new AuthToken(username, userRole);
                     user = Entity.newBuilder(user)
+                            .set("username", user.getString("username"))
                             .set("password", DigestUtils.sha3_512Hex(data.newPassword))
-                            .set("tokenID", token.tokenID)
+                            .set("email", user.getString("email"))
+                            .set("name", user.getString("name"))
+                            .set("phone", user.getString("phone"))
+                            .set("profile", user.getString("profile"))
+                            .set("work", user.getString("work"))
+                            .set("workplace", user.getString("workplace"))
+                            .set("address", user.getString("address"))
+                            .set("postalCode", user.getString("postalCode"))
+                            .set("fiscal", user.getString("fiscal"))
+                            .set("role", user.getString("role"))
+                            .set("state", user.getString("state"))
+                            .set("userCreationTime", user.getTimestamp("userCreationTime"))
+                            .set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
                             .build();
                     txn.update(user);
                     txn.commit();
                     LOG.fine("Password change: " + token.username + "'s' password was changed.");
-                    return Response.ok(g.toJson(token)).entity("User's role changed.").build();
+                    return Response.ok(g.toJson(token)).build();
 			    } else {
                     txn.rollback();
                     LOG.warning("Password change: " + token.username + " provided wrong password.");
@@ -299,7 +329,23 @@ public class ChangeUserResource {
             String adminRole = admin.getString("role");
             int validation = token.isStillValid(admin.getString("tokenID"), adminRole);
             if ( validation == 1 ) {
-                user = Entity.newBuilder(user).set("role", data.role).build();
+                user = Entity.newBuilder(user)
+                            .set("username", user.getString("username"))
+                            .set("password", user.getString("password"))
+                            .set("email", user.getString("email"))
+                            .set("name", user.getString("name"))
+                            .set("phone", user.getString("phone"))
+                            .set("profile", user.getString("profile"))
+                            .set("work", user.getString("work"))
+                            .set("workplace", user.getString("workplace"))
+                            .set("address", user.getString("address"))
+                            .set("postalCode", user.getString("postalCode"))
+                            .set("fiscal", user.getString("fiscal"))
+                            .set("role", data.role)
+                            .set("state", user.getString("state"))
+                            .set("userCreationTime", user.getTimestamp("userCreationTime"))
+                            .set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
+                            .build();
                 txn.update(user);
                 txn.commit();
                 LOG.fine("Role change: " + data.username + "'s' role was changed to " + data.role + ".");
@@ -368,7 +414,21 @@ public class ChangeUserResource {
                     if ( user.getString("role").equals(UserConstants.USER) ) {
                         String state = user.getString("state").equals(UserConstants.ACTIVE) ? UserConstants.INACTIVE : UserConstants.ACTIVE;
                         user = Entity.newBuilder(user)
+                            .set("username", user.getString("username"))
+                            .set("password", user.getString("password"))
+                            .set("email", user.getString("email"))
+                            .set("name", user.getString("name"))
+                            .set("phone", user.getString("phone"))
+                            .set("profile", user.getString("profile"))
+                            .set("work", user.getString("work"))
+                            .set("workplace", user.getString("workplace"))
+                            .set("address", user.getString("address"))
+                            .set("postalCode", user.getString("postalCode"))
+                            .set("fiscal", user.getString("fiscal"))
+                            .set("role", user.getString("role"))
                             .set("state", state)
+                            .set("userCreationTime", user.getTimestamp("userCreationTime"))
+                            .set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
                             .build();
                     } else { // GBO users can only change USER states
                         txn.rollback();
@@ -380,7 +440,21 @@ public class ChangeUserResource {
                     if ( userRole.equals(UserConstants.USER) || userRole.equals(UserConstants.GBO) ) {
                         String state = user.getString("state").equals(UserConstants.ACTIVE) ? UserConstants.INACTIVE : UserConstants.ACTIVE;
                         user = Entity.newBuilder(user)
+                            .set("username", user.getString("username"))
+                            .set("password", user.getString("password"))
+                            .set("email", user.getString("email"))
+                            .set("name", user.getString("name"))
+                            .set("phone", user.getString("phone"))
+                            .set("profile", user.getString("profile"))
+                            .set("work", user.getString("work"))
+                            .set("workplace", user.getString("workplace"))
+                            .set("address", user.getString("address"))
+                            .set("postalCode", user.getString("postalCode"))
+                            .set("fiscal", user.getString("fiscal"))
+                            .set("role", user.getString("role"))
                             .set("state", state)
+                            .set("userCreationTime", user.getTimestamp("userCreationTime"))
+                            .set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
                             .build();
                     } else { // GA users can change USER and GBO states
                         txn.rollback();
@@ -389,8 +463,22 @@ public class ChangeUserResource {
                     }
                 } else if ( adminRole.equals(UserConstants.SU) ) {
                     String state = user.getString("state").equals(UserConstants.ACTIVE) ? UserConstants.INACTIVE : UserConstants.ACTIVE;
-                        user = Entity.newBuilder(user)
+                    user = Entity.newBuilder(user)
+                            .set("username", user.getString("username"))
+                            .set("password", user.getString("password"))
+                            .set("email", user.getString("email"))
+                            .set("name", user.getString("name"))
+                            .set("phone", user.getString("phone"))
+                            .set("profile", user.getString("profile"))
+                            .set("work", user.getString("work"))
+                            .set("workplace", user.getString("workplace"))
+                            .set("address", user.getString("address"))
+                            .set("postalCode", user.getString("postalCode"))
+                            .set("fiscal", user.getString("fiscal"))
+                            .set("role", user.getString("role"))
                             .set("state", state)
+                            .set("userCreationTime", user.getTimestamp("userCreationTime"))
+                            .set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
                             .build();
                 } else if ( adminRole.equals(UserConstants.USER) ) {
                     txn.rollback();

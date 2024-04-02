@@ -32,12 +32,12 @@ document.addEventListener('DOMContentLoaded', function() {
         var username = token.username;
         var jsonData = {};
         jsonData["username"] = username;
-        jsonData["authToken"] = authToken;
+        jsonData["token"] = token;
         deleteUser(JSON.stringify(jsonData));
     });
 
     function deleteUser(jsonData) {
-        fetch('https://apdc-64320.oa.r.appspot.com/rest/change/user/remove', {
+        fetch('/rest/change/user/remove', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

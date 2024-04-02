@@ -48,23 +48,36 @@ public class LogoutResource {
             String userRole = user.getString("role");
             int validation = token.isStillValid(user.getString("tokenID"), userRole);
             if ( validation == 1 ) {
-                user = Entity.newBuilder(userKey).set("tokenID", "").build();
-                txn.update(user);
+                user = Entity.newBuilder(userKey)
+						.set("username", user.getString("username"))
+						.set("password", user.getString("password"))
+						.set("email", user.getString("email"))
+						.set("name", user.getString("name"))
+						.set("phone", user.getString("phone"))
+						.set("profile", user.getString("profile"))
+						.set("work", user.getString("work"))
+						.set("workplace", user.getString("workplace"))
+						.set("address", user.getString("address"))
+						.set("postalCode", user.getString("postalCode"))
+						.set("fiscal", user.getString("fiscal"))
+						.set("role", user.getString("role"))
+						.set("state", user.getString("state"))
+						.set("userCreationTime", user.getTimestamp("userCreationTime"))
+						.set("tokenID", "")
+						.build();
+                txn.put(user);
                 txn.commit();
                 LOG.fine("Logout: " + token.username + " logged out.");
                 return Response.ok().entity("User logged out.").build();
             } else if ( validation == 0 ) {
-                // TODO: Send the admin back to the login page
                 txn.rollback();
                 LOG.fine("Logout: " + token.username + "'s' authentication token expired.");
                 return Response.status(Status.UNAUTHORIZED).entity("Token time limit exceeded, make new login.").build();
             } else if ( validation == -1 ) { // Role is different
-                // TODO: Send the admin back to the login page
                 txn.rollback();
                 LOG.warning("Logout: " + token.username + "'s' authentication token has different role.");
                 return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
             } else if ( validation == -2 ) { // tokenID is false
-                // TODO: Send the admin back to the login page
                 txn.rollback();
                 LOG.severe("Logout: " + token.username + "'s' authentication token has different tokenID, possible attempted breach.");
                 return Response.status(Status.UNAUTHORIZED).entity("TokenId incorrect, make new login").build();
@@ -76,7 +89,7 @@ public class LogoutResource {
         } catch ( Exception e ) {
 			txn.rollback();
 			LOG.severe("Logout: " + e.getMessage());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		} finally {
             if ( txn.isActive() ) {
                 txn.rollback();

@@ -15,6 +15,8 @@ indexes:
   properties:
   - name: username
     direction: desc
+  - name: password
+    direction: desc
   - name: email
     direction: desc
   - name: name
@@ -39,3 +41,11 @@ indexes:
     direction: desc
   - name: userCreationTime
     direction: desc
+- kind: User
+  properties:
+  - name: profile
+  - name: role
+  - name: state
+  - name: email
+  - name: name
+  - name: username

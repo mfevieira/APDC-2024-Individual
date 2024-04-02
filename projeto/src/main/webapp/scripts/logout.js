@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function logoutUser(jsonData) {
-        fetch('https://apdc-64320.oa.r.appspot.com/rest/logout/user', {
+        fetch('/rest/logout/user', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

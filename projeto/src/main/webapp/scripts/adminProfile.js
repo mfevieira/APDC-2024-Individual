@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function changeUserData(jsonData) {
-        fetch('https://apdc-64320.oa.r.appspot.com/rest/change/user/data', {
+        fetch('/rest/change/user/data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 const message = await response.text();
                 console.log('Change user data: ', message);
+                window.location.href = "login.html";
             } else {
                 const errorMessage = await response.text();
                 console.error('Fetch error: ', errorMessage);

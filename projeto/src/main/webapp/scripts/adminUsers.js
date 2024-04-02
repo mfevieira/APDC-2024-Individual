@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = "login.html";
         return;
     }
-    fetch('https://apdc-64320.oa.r.appspot.com/rest/list/users', {
+    fetch('/rest/list/users', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

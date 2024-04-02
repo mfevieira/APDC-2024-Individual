@@ -13,7 +13,14 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.google.cloud.Timestamp;
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
@@ -86,7 +93,7 @@ public class LoginResource {
 						.set("phone", user.getString("phone"))
 						.set("profile", user.getString("profile"))
 						.set("work", user.getString("work"))
-						.set("workplace", user.getString("workPlace"))
+						.set("workplace", user.getString("workplace"))
 						.set("address", user.getString("address"))
 						.set("postalCode", user.getString("postalCode"))
 						.set("fiscal", user.getString("fiscal"))
@@ -95,7 +102,7 @@ public class LoginResource {
 						.set("userCreationTime", user.getTimestamp("userCreationTime"))
 						.set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
 						.build();
-				txn.put(stats, user);
+				txn.put(user);
 				txn.commit();
 				LOG.info("Login: " + data.username + " logged in successfully.");
 				return Response.ok(g.toJson(token)).build();
@@ -115,7 +122,7 @@ public class LoginResource {
 		} catch ( Exception e ) {
 			txn.rollback();
 			LOG.severe("Login: " + e.getMessage());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		} finally {
 			if ( txn.isActive() ) {
 				txn.rollback();
@@ -123,15 +130,6 @@ public class LoginResource {
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 		}
-	}
-
-	@POST
-	@Path("/token")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getToken(AuthToken token) {
-		LOG.fine("Token: token display attempt by " + token.username + ".");
-		return Response.ok(g.toJson(token)).build();
 	}
 
 	@POST

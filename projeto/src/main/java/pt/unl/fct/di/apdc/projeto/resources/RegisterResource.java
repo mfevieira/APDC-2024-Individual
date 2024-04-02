@@ -44,9 +44,10 @@ public class RegisterResource {
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public Response register(RegisterData data) {
 		LOG.fine("Resgister: attempt to register " + data.username + ".");
-		if (!data.validRegistration()) {
-			LOG.warning("Register: Register attempt using missing or invalid parameters.");
-			return Response.status(Status.BAD_REQUEST).entity("Missing or invalid parameter.").build();
+		int validRegister = data.validRegistration();
+		if ( validRegister != 0 ) {
+			LOG.warning("Register: Register attempt using invalid " + data.getInvalidReason(validRegister) + ".");
+			return Response.status(Status.BAD_REQUEST).entity("Invalid " + data.getInvalidReason(validRegister) + ".").build();
 		}
 		Transaction txn = datastore.newTransaction();
 		try {
@@ -73,11 +74,10 @@ public class RegisterResource {
 				txn.add(user);
 				txn.commit();
 				LOG.fine("Register: " + data.username + "'s was registered in the database.");
-				return Response.ok(g.toJson(token)).entity("User Registered.").build();
+				return Response.ok(g.toJson(token)).build();
 			} else {
 				txn.rollback();
 				LOG.fine("Register: duplicate username.");
-				// TODO: send user back to register page
 				return Response.status(Status.CONFLICT)
 						.entity("User already exists. Pick a different username.")
 						.build();

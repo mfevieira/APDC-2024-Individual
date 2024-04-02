@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function registerUser(jsonData) {
-        fetch('https://apdc-64320.oa.r.appspot.com/rest/register/user', {
+        fetch('/rest/register/user', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -33,8 +33,10 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(async response => {
             if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem("authToken", JSON.stringify(data));
+                const token = await response.json();
+                localStorage.setItem("authToken", JSON.stringify(token));
+                console.log('User registered.')
+                window.location.href = "index.html";
             } else {
                 const errorMessage = await response.text();
                 console.error('Fetch error: ', errorMessage);

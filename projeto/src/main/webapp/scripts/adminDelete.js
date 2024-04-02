@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function changeUserRemove(jsonData) {
-        fetch('https://apdc-64320.oa.r.appspot.com/rest/change/user/remove', {
+        fetch('/rest/change/user/remove', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 const message = await response.text();
                 console.log('Remove user: ', message);
+                window.location.href = "index.html";
             } else {
                 const errorMessage = await response.text();
                 console.error('Fetch error: ', errorMessage);

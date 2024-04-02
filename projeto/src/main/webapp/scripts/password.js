@@ -5,14 +5,14 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
 
         var newPassword = document.getElementById('newPassword').value;
-        var confirmPassword = document.getElementById('confirmPassword').value;
+        var confirmation = document.getElementById('confirmation').value;
 
-        if (newPassword !== confirmPassword) {
+        if (newPassword !== confirmation) {
             alert("New password and confirmation do not match. Please try again.");
             return;
         }
 
-        var formData = new FormData(registrationForm);
+        var formData = new FormData(passwordForm);
         var jsonData = {};
 
         formData.forEach(function(value, key) {
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function changePassword(jsonData) {
-        fetch('https://apdc-64320.oa.r.appspot.com/rest/change/user/password', {
+        fetch('/rest/change/user/password', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -73,7 +73,7 @@ public class ListUserResource {
                         projection.add(new UserQuery(result.getString("username"), result.getString("email"), result.getString("name")));
                     }
 				    LOG.info("List users: " + token.username + " received list of active and public USER users.");
-				    return Response.ok(g.toJson(projection)).entity("The list of active and public USER users.").build();
+				    return Response.ok(g.toJson(projection)).build();
                 } else if ( userRole.equals(UserConstants.GBO) ) {
                     Query<Entity> query = Query.newEntityQueryBuilder()
 				            .setKind("User")
@@ -85,7 +85,7 @@ public class ListUserResource {
                         userList.add(results.next());
                     }
 				    LOG.info("List users: " + token.username + " received list of all USER users.");
-				    return Response.ok(g.toJson(userList)).entity("The list of all USER users.").build();
+				    return Response.ok(g.toJson(userList)).build();
                 } else if ( userRole.equals(UserConstants.GA) ) {
                     Query<Entity> query = Query.newEntityQueryBuilder()
 				            .setKind("User")
@@ -98,7 +98,7 @@ public class ListUserResource {
                         userList.add(results.next());
                     }
 				    LOG.info("List users: " + token.username + " received list of all USER, GBO and GA users.");
-				    return Response.ok(g.toJson(userList)).entity("The list of all USER, GBO and GA users.").build();
+				    return Response.ok(g.toJson(userList)).build();
                 } else if ( userRole.equals(UserConstants.SU) ) {
                     Query<Entity> query = Query.newEntityQueryBuilder()
 				            .setKind("User")
@@ -110,7 +110,7 @@ public class ListUserResource {
                         userList.add(results.next());
                     }
 				    LOG.info("List users: " + token.username + " received list of all users.");
-				    return Response.ok(g.toJson(userList)).entity("The list of all users.").build();
+				    return Response.ok(g.toJson(userList)).build();
                 } else {
                     LOG.severe("List users: Unrecognized role.");
                     return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -130,7 +130,7 @@ public class ListUserResource {
             }
         } catch ( Exception e ) {
 			LOG.severe("List users: " + e.getMessage());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
     }
 }

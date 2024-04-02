@@ -1,7 +1,7 @@
 function checkLoginStatus() {
     var authToken = localStorage.getItem("authToken");
     if ( authToken != null ) {
-        fetch('/rest/check', {
+        fetch('/rest/login/check', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -14,7 +14,7 @@ function checkLoginStatus() {
                 document.getElementById('loginBtn').style.display = 'none';
                 document.getElementById('registerBtn').style.display = 'none';
                 document.getElementById('logoutBtn').style.display = 'block';
-                if ( token.role.equals("USER") ) {
+                if ( token.role === "USER" ) {
                     document.getElementById('userCenterBtn').style.display = 'block';
                     document.getElementById('adminCenterBtn').style.display = 'none';
                 } else {
