@@ -20,8 +20,8 @@ version="3.1">
 	</error-page>
 
 	<servlet>
-		<servlet-name>RootUserInit</servlet-name>
-		<servlet-class>pt.unl.fct.di.apdc.projeto.resources.AdminInitResource</servlet-class>
+		<servlet-name>AdminUserInitializer</servlet-name>
+		<servlet-class>pt.unl.fct.di.apdc.projeto.resources.AdminUserInitializer</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
@@ -47,8 +47,10 @@ version="3.1">
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>RootUserInit</servlet-name>
-		<url-pattern>/rootUserInit</url-pattern>
+		<servlet-name>AdminUserInitializer</servlet-name>
+		<url-pattern>/adminUserInitializer</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
 		<servlet-name>MainServices</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>

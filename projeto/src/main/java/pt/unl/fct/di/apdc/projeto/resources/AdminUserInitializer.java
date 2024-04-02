@@ -15,13 +15,14 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
 
 import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 
-public class AdminInitResource extends HttpServlet {
+public class AdminUserInitializer extends HttpServlet {
+
+    private static final long serialVersionUID = 1L;
     
     /** Logger Object */
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
@@ -29,12 +30,9 @@ public class AdminInitResource extends HttpServlet {
 	/** The data store to store users in */
 	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
-	/** The User kind key factory */
-	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
-
     @Override
     public void init() throws ServletException {
-        Key rootKey = userKeyFactory.newKey("root");
+        Key rootKey = datastore.newKeyFactory().setKind("User").newKey("root");
         Transaction txn = datastore.newTransaction();
         try {
             Entity root = txn.get(rootKey);
