@@ -3,36 +3,16 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>User Registration</title>
+        <title>Change User Data</title>
         <link rel="stylesheet" href="styles.css">
     </head>
     <body>
         <div class="container">
-            <h1>User Registration</h1>
-            <form id="registrationForm">
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirmation">Confirm Password:</label>
-                    <input type="password" id="confirmation" name="confirmation" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="text" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
+            <h1>Change User Data</h1>
+            <form id="userDataForm">
                 <div class="form-group">
                     <label for="phone">Phone Number:</label>
-                    <input type="text" id="phone" name="phone" required>
+                    <input type="text" id="phone" name="phone">
                 </div>
                 <div class="form-group">
                     <label for="profile">Profile Visibility:</label>
@@ -62,10 +42,10 @@
                     <input type="text" id="fiscal" name="fiscal">
                 </div>
                 <div class="form-group">
-                    <button class="btn"type="submit">Register</button>
+                    <button class="btn"type="submit">Submit Changes</button>
                 </div>
             </form>
         </div>
-        <script src="../scripts/register.js"></script>
+        <script src="../scripts/profile.js"></script>
     </body>
 </html>

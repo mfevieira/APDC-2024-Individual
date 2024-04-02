@@ -5,14 +5,16 @@ public class PasswordData {
     public String oldPassword;
 	public String newPassword;
     public String confirmation;
+	public AuthToken token;
 	
 	public PasswordData() {
 	}
 	
-	public PasswordData(String oldPassword, String newPassword, String confirmation) {
+	public PasswordData(String oldPassword, String newPassword, String confirmation, AuthToken token) {
         this.oldPassword = oldPassword;
         this.newPassword = newPassword;
         this.confirmation = confirmation;
+		this.token = token;
 	}
 	
 	/**

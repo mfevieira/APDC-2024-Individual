@@ -12,6 +12,10 @@ public class AuthToken {
 	public long creationDate;
 	public long expirationDate;
 	
+	public AuthToken() {
+		
+	}
+
 	public AuthToken(String username, String role) {
 		this.username = username;
 		this.role = role;

@@ -4,24 +4,27 @@ document.addEventListener('DOMContentLoaded', function() {
     registrationForm.addEventListener('submit', function(event) {
         event.preventDefault();
 
+        var password = document.getElementById('password').value;
+        var confirmation = document.getElementById('confirmation').value;
+
+        if (password != confirmation) {
+            alert("Password and Confirmation password do not match. Please try again.");
+            return;
+        }
+
         var formData = new FormData(registrationForm);
         var jsonData = {};
 
         formData.forEach(function(value, key) {
             jsonData[key] = value;
         });
-        jsonData["role"] = "";
-        jsonData["state"] = "";
-
-        // Convert JSON object to string
-        var jsonString = JSON.stringify(jsonData);
-
-        // Send JSON data to the server using XHR or Fetch API
-        sendDataToServer(jsonString);
+        //jsonData["role"] = "";
+        //jsonData["state"] = "";
+        registerUser(JSON.stringify(jsonData));
     });
 
-    function sendDataToServer(jsonData) {
-        fetch('https://apdc-64320.oa.r.appspot.com/rest/register/v1', {
+    function registerUser(jsonData) {
+        fetch('https://apdc-64320.oa.r.appspot.com/rest/register/user', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -31,10 +34,10 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(async response => {
             if (response.ok) {
                 const data = await response.json();
-                localStorage.setItem("authToken", data);
+                localStorage.setItem("authToken", JSON.stringify(data));
             } else {
                 const errorMessage = await response.text();
-                console.error('Fetch error:', errorMessage);
+                console.error('Fetch error: ', errorMessage);
             }
         });
     }

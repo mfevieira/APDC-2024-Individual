@@ -1,12 +1,10 @@
 package pt.unl.fct.di.apdc.projeto.util;
 
-public class RegisterData {
-
-	public String username;
+public class ChangeData {
+    
+    public String username;
 
 	public String password;
-	
-	public String confirmation;
 	
 	public String email;
 	
@@ -29,15 +27,16 @@ public class RegisterData {
     public String role;
 
     public String state;
+
+    public AuthToken token;
 	
-	public RegisterData() {
+	public ChangeData() {
 		
 	}
 	
-	public RegisterData(String username, String password, String confirmation, String email, String name, String phone, String profile, String work, String workPlace, String address, String postalCode, String fiscal, String role, String state) {
+	public ChangeData(String username, String password, String email, String name, String phone, String profile, String work, String workPlace, String address, String postalCode, String fiscal, String role, String state, AuthToken token) {
 		this.username = username;
 		this.password = password;
-		this.confirmation = confirmation;
 		this.email = email;
 		this.name = name;
 		this.phone = phone;
@@ -49,6 +48,7 @@ public class RegisterData {
         this.fiscal = fiscal;
         this.role = role;
         this.state = state;
+        this.token = token;
 	}
 	
 	/**
@@ -110,7 +110,7 @@ public class RegisterData {
 	 * @return true if the password is invalid, false otherwise.
 	 */
 	protected boolean invalidPassword() {
-		if ( this.password == null || this.confirmation == null || !this.password.equals(this.confirmation) )
+		if ( this.password == null )
 			return true;
 		if ( this.password.length() < 10 || 
 			this.password.equals(this.password.toLowerCase()) || 

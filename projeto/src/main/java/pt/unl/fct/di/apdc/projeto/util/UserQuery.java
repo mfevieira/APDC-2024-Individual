@@ -2,11 +2,15 @@ package pt.unl.fct.di.apdc.projeto.util;
 
 public class UserQuery {
 
-    public final String username;
+    public String username;
 
-    public final String email;
+    public String email;
 
-    public final String name;
+    public String name;
+
+    public UserQuery() {
+
+    }
 
     public UserQuery(String username, String email, String name) {
         this.username = username;

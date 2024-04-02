@@ -116,15 +116,12 @@ public class ListUserResource {
                     return Response.status(Status.INTERNAL_SERVER_ERROR).build();
                 }
             } else if ( validation == 0 ) {
-                // TODO: Send the user back to the login page
                 LOG.fine("List users: " + token.username + "'s' authentication token expired.");
                 return Response.status(Status.UNAUTHORIZED).entity("Token time limit exceeded, make new login.").build();
             } else if ( validation == -1 ) { // Role is different
-                // TODO: Send the user back to the login page
                 LOG.warning("List users: " + token.username + "'s' authentication token has different role.");
                 return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
             } else if ( validation == -2 ) { // tokenID is false
-                // TODO: Send the user back to the login page
                 LOG.severe("List users: " + token.username + "'s' authentication token has different tokenID, possible attempted breach.");
                 return Response.status(Status.UNAUTHORIZED).entity("TokenId incorrect, make new login").build();
             } else {

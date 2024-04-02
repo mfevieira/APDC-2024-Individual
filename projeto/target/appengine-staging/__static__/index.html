@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Welcome to My Website</title>
-      <link rel="stylesheet" href="styles.css">
-  </head>
-  <body>
-      <div class="container">
-          <h1>Welcome to My Website</h1>
-          <div class="links">
-              <a href="login.html">Login</a>
-              <a href="register.html">Register</a>
-          </div>
-      </div>
-  </body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to My Website</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <button id="loginBtn"       class="btn" onclick="location.href='login.html';"       style="display: block;" >Login</button>
+        <button id="registerBtn"    class="btn" onclick="location.href='register.html';"    style="display: block;" >Register</button>
+        <button id="logoutBtn"      class="btn" onclick="location.href='logout.html';"      style="display: none;"  >Logout</button>
+        <button id="userCenterBtn"  class="btn" onclick="location.href='user.html';"        style="display: none;"  >User Center</button>
+        <button id="adminCenterBtn" class="btn" onclick="location.href='admin.html';"       style="display: none;"  >Admin Center</button>
+        <script src="../scripts/index.js"></script>
+    </body>
 </html>

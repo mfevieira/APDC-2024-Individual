@@ -13,16 +13,4 @@ public class LoginData {
 		this.username = username;
 		this.password = password;
 	}
-	
-	/**
-	 * Method to check if the data is valid for registry.
-	 * @return true if all the data fields are not null, false otherwise.
-	 */
-	public boolean validRegistration() {
-		if ( this.username == null || this.password == null ) {
-			return false;
-		} else {
-			return true;
-		}
-	}
 }

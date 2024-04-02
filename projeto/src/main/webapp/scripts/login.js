@@ -1,30 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var registrationForm = document.getElementById('registrationForm');
+    var loginForm = document.getElementById('loginForm');
 
-    registrationForm.addEventListener('submit', function(event) {
+    loginForm.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        var password = document.getElementById('password').value;
-        var confirmation = document.getElementById('confirmation').value;
-
-        if (password != confirmation) {
-            alert("Password and Confirmation password do not match. Please try again.");
-            return;
-        }
-
-        var formData = new FormData(registrationForm);
+        var formData = new FormData(loginForm);
         var jsonData = {};
 
         formData.forEach(function(value, key) {
             jsonData[key] = value;
         });
-        //jsonData["role"] = "";
-        //jsonData["state"] = "";
-        registerUser(JSON.stringify(jsonData));
+        loginUser(JSON.stringify(jsonData));
     });
 
-    function registerUser(jsonData) {
-        fetch('https://apdc-64320.oa.r.appspot.com/rest/register/user', {
+    function loginUser(jsonData) {
+        fetch('https://apdc-64320.oa.r.appspot.com/rest/login/user', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
