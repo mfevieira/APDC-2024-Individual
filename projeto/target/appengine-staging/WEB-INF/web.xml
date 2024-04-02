@@ -20,12 +20,6 @@ version="3.1">
 	</error-page>
 
 	<servlet>
-		<servlet-name>RootUserInit</servlet-name>
-		<servlet-class>pt.unl.fct.di.apdc.projeto.resources.AdminInitResource</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-	<servlet>
 		<servlet-name>MainServices</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
@@ -44,13 +38,23 @@ version="3.1">
 			<param-name>jersey.config.server.tracing.type</param-name>
 			<param-value>ALL</param-value> <!-- This is a debug utility that should be disabled when code goes to production -->
 		</init-param>
-		<load-on-startup>2</load-on-startup>
+		<load-on-startup>1</load-on-startup>
 	</servlet>
+	
 	<servlet-mapping>
-		<servlet-name>RootUserInit</servlet-name>
-		<url-pattern>/rootUserInit</url-pattern>
 		<servlet-name>MainServices</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AdminUserInitializer</servlet-name>
+		<servlet-class>pt.unl.fct.di.apdc.projeto.resources.AdminUserInitializer</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>AdminUserInitializer</servlet-name>
+		<url-pattern>/adminUserInitializer</url-pattern>
 	</servlet-mapping>
 
 </web-app>
