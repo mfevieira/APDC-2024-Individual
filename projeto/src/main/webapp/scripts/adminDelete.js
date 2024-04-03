@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function changeUserRemove(jsonData) {
-        fetch('/rest/change/user/remove', {
+        fetch('/rest/user/remove', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

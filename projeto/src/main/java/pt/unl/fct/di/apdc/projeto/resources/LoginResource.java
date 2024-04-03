@@ -95,7 +95,7 @@ public class LoginResource {
 						.set("work", user.getString("work"))
 						.set("workplace", user.getString("workplace"))
 						.set("address", user.getString("address"))
-						.set("postalCode", user.getString("postalCode"))
+						.set("postalcode", user.getString("postalcode"))
 						.set("fiscal", user.getString("fiscal"))
 						.set("role", user.getString("role"))
 						.set("state", user.getString("state"))
@@ -149,15 +149,15 @@ public class LoginResource {
 		if ( validation == 1 ) {
 			LOG.fine("Check: " + token.username + " is still logged in.");
 			return Response.ok().build();
-		} else if ( validation == 0 ) {
+		} else if ( validation == 0 ) { // Token time has run out
 			LOG.fine("Check: " + token.username + "'s authentication token expired.");
-			return Response.status(Status.UNAUTHORIZED).build();
-		} else if ( validation == -1 ) {
+			return Response.status(Status.UNAUTHORIZED).entity("Token time limit exceeded, make new login.").build();
+		} else if ( validation == -1 ) { // Role is different
 			LOG.warning("Check: " + token.username + "'s authentication token has different role.");
-			return Response.status(Status.UNAUTHORIZED).build();
-		} else if ( validation == -2 ) {
+			return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
+		} else if ( validation == -2 ) { // tokenID is false
 			LOG.severe("Check: " + token.username + "'s authentication token has different tokenID, possible attempted breach.");
-			return Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.UNAUTHORIZED).entity("TokenId incorrect, make new login").build();
 		} else {
 			LOG.fine("Check: authentication token validity error.");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();

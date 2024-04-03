@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const userList = document.createElement('ul');
         data.forEach(user => {
             const listItem = document.createElement('li');
-            listItem.textContent = `Username: ${user.username}, Email: ${user.email}, Name: ${user.name}, Phone: ${user.phone}, Profile: ${user.profile}, Work: ${user.work}, WorkPlace: ${user.workPlace}, Address: ${user.address}, Postal Code: ${user.postalCode}, Fiscal: ${user.fiscal}`;
+            listItem.textContent = `Username: ${user.username}, Email: ${user.email}, Name: ${user.name}, Phone: ${user.phone}, Profile: ${user.profile}, Work: ${user.work}, Workplace: ${user.workplace}, Address: ${user.address}, Postal Code: ${user.postalcode}, Fiscal: ${user.fiscal}`;
             userList.appendChild(listItem);
         });
         userListContainer.appendChild(userList);

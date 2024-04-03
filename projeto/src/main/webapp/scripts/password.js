@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function changePassword(jsonData) {
-        fetch('/rest/change/user/password', {
+        fetch('/rest/user/change/password', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

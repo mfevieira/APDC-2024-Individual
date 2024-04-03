@@ -47,7 +47,7 @@ public class AdminUserInitializer extends HttpServlet {
 						.set("work", "root")
 						.set("workplace", "root")
 						.set("address", "root")
-						.set("postalCode", "root")
+						.set("postalcode", "root")
 						.set("fiscal", "root")
 						.set("role", UserConstants.SU)
 						.set("state", UserConstants.ACTIVE)

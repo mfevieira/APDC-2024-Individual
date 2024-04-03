@@ -58,7 +58,7 @@ public class LogoutResource {
 						.set("work", user.getString("work"))
 						.set("workplace", user.getString("workplace"))
 						.set("address", user.getString("address"))
-						.set("postalCode", user.getString("postalCode"))
+						.set("postalcode", user.getString("postalcode"))
 						.set("fiscal", user.getString("fiscal"))
 						.set("role", user.getString("role"))
 						.set("state", user.getString("state"))
@@ -69,7 +69,7 @@ public class LogoutResource {
                 txn.commit();
                 LOG.fine("Logout: " + token.username + " logged out.");
                 return Response.ok().entity("User logged out.").build();
-            } else if ( validation == 0 ) {
+            } else if ( validation == 0 ) { // Token time has run out
                 txn.rollback();
                 LOG.fine("Logout: " + token.username + "'s' authentication token expired.");
                 return Response.status(Status.UNAUTHORIZED).entity("Token time limit exceeded, make new login.").build();
@@ -89,7 +89,7 @@ public class LogoutResource {
         } catch ( Exception e ) {
 			txn.rollback();
 			LOG.severe("Logout: " + e.getMessage());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		} finally {
             if ( txn.isActive() ) {
                 txn.rollback();

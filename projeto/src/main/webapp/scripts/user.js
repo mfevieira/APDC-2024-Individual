@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         var authToken = localStorage.getItem("authToken");
         if ( authToken != null ) {
-            // TODO: check if this prints correctly
             alert("Auth Token Data:\n" + authToken);
         } else {
             alert("Auth Token not found.");
@@ -37,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function deleteUser(jsonData) {
-        fetch('/rest/change/user/remove', {
+        fetch('/rest/user/remove', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

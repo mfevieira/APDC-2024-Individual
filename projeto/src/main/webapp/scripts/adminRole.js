@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function changeUserRole(jsonData) {
-        fetch('/rest/change/user/role', {
+        fetch('/rest/user/change/role', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

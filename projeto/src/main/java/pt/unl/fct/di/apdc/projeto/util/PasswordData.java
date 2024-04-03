@@ -19,7 +19,7 @@ public class PasswordData {
 	
 	/**
 	 * Method to check if the data is valid for password alteration.
-	 * @return true if all the data fields are not null, oldPassword is correct and newPassword is the same as confirmation, false otherwise.
+	 * @return true if all the data fields are not null, newPassword obeys the password rules and newPassword is the same as confirmation, false otherwise.
 	 */
 	public boolean validPasswordData() {
 		if ( this.confirmation == null || this.oldPassword == null || this.newPassword == null || this.invalidPassword() ) {

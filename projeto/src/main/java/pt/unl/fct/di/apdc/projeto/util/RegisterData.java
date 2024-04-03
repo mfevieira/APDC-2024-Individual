@@ -18,11 +18,11 @@ public class RegisterData {
 
     public String work;
 
-    public String workPlace;
+    public String workplace;
 
     public String address;
 
-    public String postalCode;
+    public String postalcode;
 
     public String fiscal;
 
@@ -34,7 +34,8 @@ public class RegisterData {
 		
 	}
 	
-	public RegisterData(String username, String password, String confirmation, String email, String name, String phone, String profile, String work, String workPlace, String address, String postalCode, String fiscal, String role, String state) {
+	public RegisterData(String username, String password, String confirmation, String email, String name, String phone, String profile, 
+						String work, String workplace, String address, String postalcode, String fiscal, String role, String state) {
 		this.username = username;
 		this.password = password;
 		this.confirmation = confirmation;
@@ -43,9 +44,9 @@ public class RegisterData {
 		this.phone = phone;
         this.profile = profile;
         this.work = work;
-        this.workPlace = workPlace;
+        this.workplace = workplace;
         this.address = address;
-        this.postalCode = postalCode;
+        this.postalcode = postalcode;
         this.fiscal = fiscal;
         this.role = role;
         this.state = state;
@@ -80,8 +81,8 @@ public class RegisterData {
 				return -3;
 			}
 		}
-		if ( this.postalCode != null && !this.postalCode.isEmpty() ) {
-			String[] format = this.postalCode.split("-");
+		if ( this.postalcode != null && !this.postalcode.isEmpty() ) {
+			String[] format = this.postalcode.split("-");
 			if ( format.length != 2 || format[0].length() != 4 || format[1].length() != 3 )
 				return -2;
 		}

@@ -60,12 +60,12 @@ public class RegisterResource {
 						.set("email", data.email)
 						.set("name", data.name)
 						.set("phone", data.phone)
-						.set("profile", data.profile == null ? UserConstants.PRIVATE : data.profile)
-						.set("work", data.work == null ? "" : data.work)
-						.set("workplace", data.workPlace == null ? "" : data.workPlace)
-						.set("address", data.address == null ? "" : data.address)
-						.set("postalCode", data.postalCode == null ? "" : data.postalCode)
-						.set("fiscal", data.fiscal == null ? "" : data.fiscal)
+						.set("profile", data.profile == null || data.profile.trim().isEmpty() ? UserConstants.PRIVATE : data.profile)
+						.set("work", data.work == null || data.work.trim().isEmpty() ? "" : data.work)
+						.set("workplace", data.workplace == null || data.workplace.trim().isEmpty() ? "" : data.workplace)
+						.set("address", data.address == null || data.address.trim().isEmpty() ? "" : data.address)
+						.set("postalcode", data.postalcode == null || data.postalcode.trim().isEmpty() ? "" : data.postalcode)
+						.set("fiscal", data.fiscal == null || data.fiscal.trim().isEmpty() ? "" : data.fiscal)
 						.set("role", UserConstants.USER)
 						.set("state", UserConstants.INACTIVE)
 						.set("userCreationTime", Timestamp.now())
@@ -78,9 +78,7 @@ public class RegisterResource {
 			} else {
 				txn.rollback();
 				LOG.fine("Register: duplicate username.");
-				return Response.status(Status.CONFLICT)
-						.entity("User already exists. Pick a different username.")
-						.build();
+				return Response.status(Status.CONFLICT).entity("User already exists. Pick a different username.").build();
 			}
 		} catch ( Exception e ) {
 			txn.rollback();

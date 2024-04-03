@@ -19,6 +19,7 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.gson.Gson;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
+import pt.unl.fct.di.apdc.projeto.util.User;
 import pt.unl.fct.di.apdc.projeto.util.UserConstants;
 import pt.unl.fct.di.apdc.projeto.util.UserQuery;
 
@@ -57,13 +58,14 @@ public class ListUserResource {
             String userRole = user.getString("role");
             int validation = token.isStillValid(user.getString("tokenID"), userRole);
             if ( validation == 1 ) {
+                Query<Entity> query;
                 if ( userRole.equals(UserConstants.USER) ) {
                     Query<ProjectionEntity> projectionQuery = Query.newProjectionEntityQueryBuilder()
 				            .setKind("User")
 				            .setFilter(CompositeFilter.and(
-                                            PropertyFilter.eq("state", UserConstants.ACTIVE),
-                                            PropertyFilter.eq("profile", UserConstants.PUBLIC),
-                                            PropertyFilter.eq("role", UserConstants.USER)))
+                                        PropertyFilter.eq("state", UserConstants.ACTIVE),
+                                        PropertyFilter.eq("profile", UserConstants.PUBLIC),
+                                        PropertyFilter.eq("role", UserConstants.USER)))
 				            .setProjection("username", "email", "name")
 				            .build();
                     List<UserQuery> projection = new LinkedList<>();
@@ -75,47 +77,38 @@ public class ListUserResource {
 				    LOG.info("List users: " + token.username + " received list of active and public USER users.");
 				    return Response.ok(g.toJson(projection)).build();
                 } else if ( userRole.equals(UserConstants.GBO) ) {
-                    Query<Entity> query = Query.newEntityQueryBuilder()
+                    query = Query.newEntityQueryBuilder()
 				            .setKind("User")
 				            .setFilter(PropertyFilter.eq("role", UserConstants.USER))
 				            .build();
-                    List<Entity> userList = new LinkedList<>();
-                    QueryResults<Entity> results = datastore.run(query);
-                    while ( results.hasNext() ) {
-                        userList.add(results.next());
-                    }
-				    LOG.info("List users: " + token.username + " received list of all USER users.");
-				    return Response.ok(g.toJson(userList)).build();
                 } else if ( userRole.equals(UserConstants.GA) ) {
-                    Query<Entity> query = Query.newEntityQueryBuilder()
+                    query = Query.newEntityQueryBuilder()
 				            .setKind("User")
 				            .setFilter(PropertyFilter.in("role", ListValue.of(UserConstants.USER, UserConstants.GBO, UserConstants.GA)))
                             .setOrderBy(OrderBy.desc("role"))
 				            .build();
-                    List<Entity> userList = new LinkedList<>();
-                    QueryResults<Entity> results = datastore.run(query);
-                    while ( results.hasNext() ) {
-                        userList.add(results.next());
-                    }
-				    LOG.info("List users: " + token.username + " received list of all USER, GBO and GA users.");
-				    return Response.ok(g.toJson(userList)).build();
                 } else if ( userRole.equals(UserConstants.SU) ) {
-                    Query<Entity> query = Query.newEntityQueryBuilder()
+                    query = Query.newEntityQueryBuilder()
 				            .setKind("User")
                             .setOrderBy(OrderBy.desc("role"))
 				            .build();
-                    List<Entity> userList = new LinkedList<>();
-                    QueryResults<Entity> results = datastore.run(query);
-                    while ( results.hasNext() ) {
-                        userList.add(results.next());
-                    }
-				    LOG.info("List users: " + token.username + " received list of all users.");
-				    return Response.ok(g.toJson(userList)).build();
                 } else {
                     LOG.severe("List users: Unrecognized role.");
                     return Response.status(Status.INTERNAL_SERVER_ERROR).build();
                 }
-            } else if ( validation == 0 ) {
+                List<User> userList = new LinkedList<>();
+                QueryResults<Entity> results = datastore.run(query);
+                while ( results.hasNext() ) {
+                    Entity next = results.next();
+                    userList.add(new User(next.getString("username"), next.getString("password"), next.getString("email"), 
+                                    next.getString("name"), next.getString("phone"), next.getString("profile"), 
+                                    next.getString("work"), next.getString("workplace"), next.getString("address"), 
+                                    next.getString("postalcode"), next.getString("fiscal"), next.getString("role"), 
+                                    next.getString("state"), next.getTimestamp("userCreationTime"), next.getString("tokenID")));
+                }
+                LOG.info("List users: " + token.username + " received list of all users.");
+                return Response.ok(g.toJson(userList)).build();
+            } else if ( validation == 0 ) { // Token time has run out
                 LOG.fine("List users: " + token.username + "'s' authentication token expired.");
                 return Response.status(Status.UNAUTHORIZED).entity("Token time limit exceeded, make new login.").build();
             } else if ( validation == -1 ) { // Role is different
