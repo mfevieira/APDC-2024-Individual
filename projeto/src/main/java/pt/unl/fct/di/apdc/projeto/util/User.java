@@ -1,6 +1,6 @@
 package pt.unl.fct.di.apdc.projeto.util;
 
-import com.google.cloud.Timestamp;
+import java.util.Date;
 
 public class User {
     
@@ -30,9 +30,11 @@ public class User {
 
     public String state;
 
-    public Timestamp userCreationTime;
+    public Date userCreationTime;
 
     public String tokenID;
+
+    public String photo;
 
 
     public User() {
@@ -40,7 +42,7 @@ public class User {
     }
 
     public User(String username, String password, String email, String name, String phone, String profile, String work, String workplace, 
-                String address, String postalcode, String fiscal, String role, String state, Timestamp userCreationTime, String tokenID) {
+                String address, String postalcode, String fiscal, String role, String state, Date userCreationTime, String tokenID, String photo) {
         this.username = username;
 		this.password = password;
 		this.email = email;
@@ -56,5 +58,6 @@ public class User {
         this.state = state;
         this.userCreationTime = userCreationTime;
         this.tokenID = tokenID;
+        this.photo = photo;
     }
 }

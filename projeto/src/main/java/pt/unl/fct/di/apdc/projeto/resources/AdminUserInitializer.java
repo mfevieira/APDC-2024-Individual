@@ -53,6 +53,7 @@ public class AdminUserInitializer extends HttpServlet {
 						.set("state", UserConstants.ACTIVE)
 						.set("userCreationTime", Timestamp.now())
 						.set("tokenID", StringValue.newBuilder("").setExcludeFromIndexes(true).build())
+						.set("photo", StringValue.newBuilder("").setExcludeFromIndexes(true).build())
 						.build();
                 txn.put(root);
                 txn.commit();

@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var authToken = localStorage.getItem("authToken");
+    var authToken = localStorage.getItem('authToken');
     if ( authToken == null ) {
-        alert("Auth Token not found. Login again.");
-        window.location.href = "login.html";
+        alert('Auth Token not found. Login again.');
+        window.location.href = 'login.html';
         return;
     }
     fetch('/rest/list/users', {

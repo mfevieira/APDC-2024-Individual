@@ -28,6 +28,8 @@ public class ChangeData {
 
     public String state;
 
+	public String photo;
+
     public AuthToken token;
 	
 	public ChangeData() {
@@ -35,7 +37,7 @@ public class ChangeData {
 	}
 	
 	public ChangeData(String username, String password, String email, String name, String phone, String profile, String work, 
-                    String workplace, String address, String postalcode, String fiscal, String role, String state, AuthToken token) {
+                    String workplace, String address, String postalcode, String fiscal, String role, String state, String photo, AuthToken token) {
 		this.username = username;
 		this.password = password;
 		this.email = email;
@@ -49,6 +51,7 @@ public class ChangeData {
         this.fiscal = fiscal;
         this.role = role;
         this.state = state;
+		this.photo = photo;
         this.token = token;
 	}
 

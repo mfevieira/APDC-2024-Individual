@@ -92,6 +92,7 @@ public class UserResource {
                         .set("state", user.getString("state"))
                         .set("userCreationTime", user.getTimestamp("userCreationTime"))
                         .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
+						.set("photo", StringValue.newBuilder(data.photo == null || data.photo.trim().isEmpty() ? user.getString("photo") : data.photo).setExcludeFromIndexes(true).build())
 						.build();
                     txn.update(user);
                     txn.commit();
@@ -136,6 +137,7 @@ public class UserResource {
                         .set("state", data.state == null || data.state.trim().isEmpty() ? user.getString("state") : data.state)
                         .set("userCreationTime", user.getTimestamp("userCreationTime"))
                         .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
+						.set("photo", StringValue.newBuilder(data.photo == null || data.photo.trim().isEmpty() ? user.getString("photo") : data.photo).setExcludeFromIndexes(true).build())
                         .build();
                 txn.update(user);
                 txn.commit();
@@ -214,6 +216,7 @@ public class UserResource {
                             .set("state", user.getString("state"))
                             .set("userCreationTime", user.getTimestamp("userCreationTime"))
                             .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
+                            .set("photo", StringValue.newBuilder(user.getString("photo")).setExcludeFromIndexes(true).build())
                             .build();
                     txn.update(user);
                     txn.commit();
@@ -305,6 +308,7 @@ public class UserResource {
                             .set("state", user.getString("state"))
                             .set("userCreationTime", user.getTimestamp("userCreationTime"))
                             .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
+                            .set("photo", StringValue.newBuilder(user.getString("photo")).setExcludeFromIndexes(true).build())
                             .build();
                 txn.update(user);
                 txn.commit();
@@ -409,6 +413,7 @@ public class UserResource {
                     .set("state", user.getString("state").equals(UserConstants.ACTIVE) ? UserConstants.INACTIVE : UserConstants.ACTIVE)
                     .set("userCreationTime", user.getTimestamp("userCreationTime"))
                     .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
+                    .set("photo", StringValue.newBuilder(user.getString("photo")).setExcludeFromIndexes(true).build())
                     .build();
                 txn.update(user);
                 txn.commit();

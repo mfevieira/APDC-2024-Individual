@@ -18,8 +18,9 @@
                 <div class="form-group">
                     <label for="profile">Profile Visibility:</label>
                     <select id="profile" name="profile">
-                        <option value="PUBLIC">Public</option>
+                        <option value="">Unchanged</option>
                         <option value="PRIVATE">Private</option>
+                        <option value="PUBLIC">Public</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -41,6 +42,16 @@
                 <div class="form-group">
                     <label for="fiscal">NIF:</label>
                     <input type="text" id="fiscal" name="fiscal">
+                </div>
+                <div class="form-group">
+                    <label for="photo">Profile Photo:</label>
+                    <input type="file" id="photo" name="photo" accept=".jpg">
+                </div>
+                <div>
+                    <small class="text-muted">Only .jpeg files allowed. Maximum size: 1MB</small>
+                </div>
+                <div>
+                    <img src="" height="200" alt="preview"/>
                 </div>
                 <div class="form-group">
                     <button class="btn"type="submit">Submit Changes</button>

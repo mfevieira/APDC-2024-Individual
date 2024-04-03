@@ -70,6 +70,7 @@ public class RegisterResource {
 						.set("state", UserConstants.INACTIVE)
 						.set("userCreationTime", Timestamp.now())
 						.set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
+						.set("photo", StringValue.newBuilder(data.photo == null || data.photo.trim().isEmpty() ? "" : data.photo).setExcludeFromIndexes(true).build())
 						.build();
 				txn.add(user);
 				txn.commit();

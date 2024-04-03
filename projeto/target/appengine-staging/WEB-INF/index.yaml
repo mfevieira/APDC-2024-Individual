@@ -31,7 +31,7 @@ indexes:
     direction: desc
   - name: address
     direction: desc
-  - name: postalCode
+  - name: postalcode
     direction: desc
   - name: fiscal
     direction: desc

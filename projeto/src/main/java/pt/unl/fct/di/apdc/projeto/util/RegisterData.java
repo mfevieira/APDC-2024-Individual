@@ -29,13 +29,15 @@ public class RegisterData {
     public String role;
 
     public String state;
+
+	public String photo;
 	
 	public RegisterData() {
 		
 	}
 	
 	public RegisterData(String username, String password, String confirmation, String email, String name, String phone, String profile, 
-						String work, String workplace, String address, String postalcode, String fiscal, String role, String state) {
+						String work, String workplace, String address, String postalcode, String fiscal, String role, String state, String photo) {
 		this.username = username;
 		this.password = password;
 		this.confirmation = confirmation;
@@ -50,6 +52,7 @@ public class RegisterData {
         this.fiscal = fiscal;
         this.role = role;
         this.state = state;
+		this.photo = photo;
 	}
 	
 	/**

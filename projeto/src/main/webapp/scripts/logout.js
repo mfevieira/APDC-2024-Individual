@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     logoutButton.addEventListener('click', function(event) {
         event.preventDefault();
-        var jsonData = localStorage.getItem("authToken");
+        var jsonData = localStorage.getItem('authToken');
         logoutUser(jsonData);
     });
 
@@ -17,11 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(async response => {
             if (response.ok) {
-                localStorage.removeItem("authToken");
-                window.location.href = "index.html";
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
             } else {
                 const errorMessage = await response.text();
                 console.error('Fetch error: ', errorMessage);
+                window.location.href = 'index.html';
             }
         })
         .catch(error => {

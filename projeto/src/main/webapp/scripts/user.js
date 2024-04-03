@@ -5,11 +5,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     tokenButton.addEventListener('click', function(event) {
         event.preventDefault();
-        var authToken = localStorage.getItem("authToken");
+        var authToken = localStorage.getItem('authToken');
         if ( authToken != null ) {
-            alert("Auth Token Data:\n" + authToken);
+            alert('Auth Token Data:\n' + authToken);
         } else {
-            alert("Auth Token not found.");
+            alert('Auth Token not found.');
         }
     });
 
@@ -21,17 +21,17 @@ document.addEventListener('DOMContentLoaded', function() {
     confirmDeleteButton.addEventListener('click', function(event) {
         event.preventDefault();
 
-        var authToken = localStorage.getItem("authToken");
+        var authToken = localStorage.getItem('authToken');
         if ( authToken == null ) {
-            alert("Auth Token not found.");
-            window.location.href = "login.html";
+            alert('Auth Token not found.');
+            window.location.href = 'login.html';
             return;
         }
         var token = JSON.parse(authToken);
         var username = token.username;
         var jsonData = {};
-        jsonData["username"] = username;
-        jsonData["token"] = token;
+        jsonData['username'] = username;
+        jsonData['token'] = token;
         deleteUser(JSON.stringify(jsonData));
     });
 
@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(async response => {
             if (response.ok) {
-                localStorage.removeItem("authToken");
-                window.location.href = "index.html";
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
             } else {
                 const errorMessage = await response.text();
                 console.error('Fetch error: ', errorMessage);

@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var authToken = localStorage.getItem("authToken");
+    var authToken = localStorage.getItem('authToken');
     if ( authToken == null ) {
-        alert("Auth Token not found. Login again.");
-        window.location.href = "login.html";
+        alert('Auth Token not found. Login again.');
+        window.location.href = 'login.html';
         return;
     }
     fetch('/rest/list/users', {
@@ -18,7 +18,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const userList = document.createElement('ul');
         data.forEach(user => {
             const listItem = document.createElement('li');
-            listItem.textContent = `Username: ${user.username}, Email: ${user.email}, Name: ${user.name}, Phone: ${user.phone}, Profile: ${user.profile}, Work: ${user.work}, Workplace: ${user.workplace}, Address: ${user.address}, Postal Code: ${user.postalcode}, Fiscal: ${user.fiscal}`;
+            listItem.textContent = `Username: ${user.username}, Email: ${user.email}, Name: ${user.name}, Phone: ${user.phone}, Profile: ${user.profile}, 
+                                    Work: ${user.work}, Workplace: ${user.workplace}, Address: ${user.address}, Postal Code: ${user.postalcode}, 
+                                    Fiscal: ${user.fiscal}, Role: ${user.role}, State: ${user.state}, User Creation Time: ${user.userCreationTime}, 
+                                    TokenID: ${user.tokenID}, Photo: `;
+            if (user.photo) {
+                const photo = document.createElement('img');
+                photo.src = user.photo;
+                photo.style.maxWidth = '100px';
+                listItem.appendChild(photo);
+            }
             userList.appendChild(listItem);
         });
         userListContainer.appendChild(userList);

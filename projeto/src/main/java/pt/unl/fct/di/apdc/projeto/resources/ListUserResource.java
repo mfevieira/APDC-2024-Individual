@@ -104,7 +104,7 @@ public class ListUserResource {
                                     next.getString("name"), next.getString("phone"), next.getString("profile"), 
                                     next.getString("work"), next.getString("workplace"), next.getString("address"), 
                                     next.getString("postalcode"), next.getString("fiscal"), next.getString("role"), 
-                                    next.getString("state"), next.getTimestamp("userCreationTime"), next.getString("tokenID")));
+                                    next.getString("state"), next.getTimestamp("userCreationTime").toDate(), next.getString("tokenID"), next.getString("photo")));
                 }
                 LOG.info("List users: " + token.username + " received list of all users.");
                 return Response.ok(g.toJson(userList)).build();

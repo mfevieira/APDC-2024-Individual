@@ -101,6 +101,7 @@ public class LoginResource {
 						.set("state", user.getString("state"))
 						.set("userCreationTime", user.getTimestamp("userCreationTime"))
 						.set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
+						.set("photo", StringValue.newBuilder(user.getString("photo")).setExcludeFromIndexes(true).build())
 						.build();
 				txn.put(user);
 				txn.commit();

@@ -3,11 +3,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     tokenButton.addEventListener('click', function(event) {
         event.preventDefault();
-        var authToken = localStorage.getItem("authToken");
+        var authToken = localStorage.getItem('authToken');
         if ( authToken != null ) {
-            alert("Auth Token Data:\n" + authToken);
+            alert('Auth Token Data:\n' + authToken);
         } else {
-            alert("Auth Token not found.");
+            alert('Auth Token not found.');
         }
     });
 });

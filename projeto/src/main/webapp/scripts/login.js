@@ -24,9 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(async response => {
             if (response.ok) {
                 const token = await response.json();
-                localStorage.setItem("authToken", JSON.stringify(token));
+                localStorage.setItem('authToken', JSON.stringify(token));
                 console.log('User logged in.')
-                window.location.href = "index.html";
+                window.location.href = 'index.html';
             } else {
                 const errorMessage = await response.text();
                 console.error('Fetch error: ', errorMessage);
