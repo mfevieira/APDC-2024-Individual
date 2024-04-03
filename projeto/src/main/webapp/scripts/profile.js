@@ -63,11 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(async response => {
             if (response.ok) {
                 const message = await response.text();
-                console.log('Change user data: ', message);
+                alert('Change user data: ' + message);
                 window.location.href = 'user.html';
             } else {
                 const errorMessage = await response.text();
-                console.error('Fetch error: ', errorMessage);
+                alert('Fetch error: ' + errorMessage);
             }
         });
     }

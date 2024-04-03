@@ -103,12 +103,20 @@ public class UserResource {
                         txn.rollback();
                         LOG.warning("Data change: " + token.username + " cannot change non USER users data.");
                         return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change data of non USER users.").build();
+                    } else if ( data.role != null || !data.role.trim().isEmpty() ) {
+                        txn.rollback();
+                        LOG.warning("Data change: " + token.username + " cannot change users' role.");
+                        return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change users' role.").build();
                     }
                 } else if ( adminRole.equals(UserConstants.GA) ) {
                     if ( !user.getString("role").equals(UserConstants.USER) && !user.getString("role").equals(UserConstants.GBO) ) {
                         txn.rollback();
                         LOG.warning("Data change: " + token.username + " cannot change GA or SU users data.");
                         return Response.status(Status.UNAUTHORIZED).entity("GA users cannot change data of GA or SU users.").build();
+                    } else if ( data.role.equals(UserConstants.GA) || data.role.equals(UserConstants.SU) ) {
+                        txn.rollback();
+                        LOG.warning("Data change: " + token.username + " cannot change users' role to GA or SU roles.");
+                        return Response.status(Status.UNAUTHORIZED).entity("GA users cannot change users' role to GA or SU roles.").build();
                     }
                 } else if ( adminRole.equals(UserConstants.SU) ) {
                     if ( !user.getString("role").equals(UserConstants.USER) && !user.getString("role").equals(UserConstants.GBO) && !user.getString("role").equals(UserConstants.GA) ) {

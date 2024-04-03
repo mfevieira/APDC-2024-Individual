@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = 'index.html';
             } else {
                 const errorMessage = await response.text();
-                console.error('Fetch error: ', errorMessage);
+                alert('Fetch error: ', errorMessage);
             }
         });
     }

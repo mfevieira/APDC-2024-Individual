@@ -21,12 +21,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = 'index.html';
             } else {
                 const errorMessage = await response.text();
-                console.error('Fetch error: ', errorMessage);
+                alert('Fetch error: ' + errorMessage);
                 window.location.href = 'index.html';
             }
         })
         .catch(error => {
-            console.error('Logout error:', error);
+            alert('Logout error:' + error);
         });
     }
 });

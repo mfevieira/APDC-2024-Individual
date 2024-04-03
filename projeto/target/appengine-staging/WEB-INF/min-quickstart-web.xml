@@ -459,21 +459,5 @@
         <tracking-mode>COOKIE</tracking-mode>
           
     </session-config>
-      
-    <error-page origin="WebDescriptor(file:///D:/Users/Miguel%20Vieira/Documents/GitHub/APDC-2024-Individual/projeto/target/appengine-staging/WEB-INF/web.xml):49">
-            
-        <error-code>500</error-code>
-            
-        <location>/error/500.html</location>
-          
-    </error-page>
-      
-    <error-page origin="WebDescriptor(file:///D:/Users/Miguel%20Vieira/Documents/GitHub/APDC-2024-Individual/projeto/target/appengine-staging/WEB-INF/web.xml):50">
-            
-        <error-code>404</error-code>
-            
-        <location>/error/404.html</location>
-          
-    </error-page>
     
 </web-app>

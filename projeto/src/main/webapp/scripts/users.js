@@ -24,6 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
         userListContainer.appendChild(userList);
     })
     .catch(error => {
-        console.error('Error fetching users: ', error);
+        alert('Error fetching users: ' + error.message);
     });
 });

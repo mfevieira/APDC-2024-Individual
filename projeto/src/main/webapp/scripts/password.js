@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = 'user.html';
             } else {
                 const errorMessage = await response.text();
-                console.error('Fetch error: ', errorMessage);
+                alert('Fetch error: ' + errorMessage);
             }
         });
     }

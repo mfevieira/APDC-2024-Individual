@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = 'admin.html';
             } else {
                 const errorMessage = await response.text();
-                console.error('Fetch error: ', errorMessage);
+                alert('Fetch error: ' + errorMessage);
             }
         });
     }
