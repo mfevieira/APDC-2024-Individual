@@ -33,6 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
         userListContainer.appendChild(userList);
     })
     .catch(error => {
-        alert('Error fetching users: ' + error.text());
+        alert('Error fetching users: ' + error.message);
     });
 });

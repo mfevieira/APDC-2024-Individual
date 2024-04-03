@@ -12,13 +12,12 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
 
-import pt.unl.fct.di.apdc.projeto.util.UserConstants;
+import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 
 public class AdminUserInitializer extends HttpServlet {
 
@@ -28,7 +27,7 @@ public class AdminUserInitializer extends HttpServlet {
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
 	/** The data store to store users in */
-	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+	private static final Datastore datastore = ServerConstants.datastore;
 
     @Override
     public void init() throws ServletException {
@@ -43,14 +42,14 @@ public class AdminUserInitializer extends HttpServlet {
 						.set("email", "root")
 						.set("name", "root")
 						.set("phone", "root")
-						.set("profile", UserConstants.PRIVATE)
+						.set("profile", ServerConstants.PRIVATE)
 						.set("work", "root")
 						.set("workplace", "root")
 						.set("address", "root")
 						.set("postalcode", "root")
 						.set("fiscal", "root")
-						.set("role", UserConstants.SU)
-						.set("state", UserConstants.ACTIVE)
+						.set("role", ServerConstants.SU)
+						.set("state", ServerConstants.ACTIVE)
 						.set("userCreationTime", Timestamp.now())
 						.set("tokenID", StringValue.newBuilder("").setExcludeFromIndexes(true).build())
 						.set("photo", StringValue.newBuilder("").setExcludeFromIndexes(true).build())

@@ -12,14 +12,20 @@ import javax.ws.rs.core.Response.*;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.ChangeData;
 import pt.unl.fct.di.apdc.projeto.util.PasswordData;
 import pt.unl.fct.di.apdc.projeto.util.RoleData;
-import pt.unl.fct.di.apdc.projeto.util.UserConstants;
+import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 import pt.unl.fct.di.apdc.projeto.util.UsernameData;
 
 @Path("/user")
@@ -29,7 +35,7 @@ public class UserResource {
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
 	/** The data store to store users in */
-	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+	private static final Datastore datastore = ServerConstants.datastore;
 
 	/** The User kind key factory */
 	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
@@ -48,7 +54,7 @@ public class UserResource {
     public Response alterData(ChangeData data) {
         AuthToken token = data.token;
         LOG.fine("Data change: " + token.username + " attempted to change user data.");
-        if ( token.role.equals(UserConstants.USER) && !data.username.equals(token.username) ) {
+        if ( token.role.equals(ServerConstants.USER) && !data.username.equals(token.username) ) {
             LOG.warning("Data change: " + token.username + " cannot change .");
             return Response.status(Status.UNAUTHORIZED).entity("User role cannot change other users data.").build();
         }
@@ -75,7 +81,7 @@ public class UserResource {
             String adminRole = admin.getString("role");
             int validation = token.isStillValid(admin.getString("tokenID"), adminRole);
             if ( validation == 1 ) {
-                if ( adminRole.equals(UserConstants.USER) ) {
+                if ( adminRole.equals(ServerConstants.USER) ) {
                     user = Entity.newBuilder(userKey)
                         .set("username", user.getString("username"))
                         .set("password", user.getString("password"))
@@ -98,8 +104,8 @@ public class UserResource {
                     txn.commit();
                     LOG.fine("Data change: " + data.username + "'s data was updated in the database.");
                     return Response.ok().entity("User's data updated.").build();
-                } else if ( adminRole.equals(UserConstants.GBO) ) {
-                    if ( !user.getString("role").equals(UserConstants.USER) ) {
+                } else if ( adminRole.equals(ServerConstants.GBO) ) {
+                    if ( !user.getString("role").equals(ServerConstants.USER) ) {
                         txn.rollback();
                         LOG.warning("Data change: " + token.username + " cannot change non USER users data.");
                         return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change data of non USER users.").build();
@@ -108,18 +114,18 @@ public class UserResource {
                         LOG.warning("Data change: " + token.username + " cannot change users' role.");
                         return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change users' role.").build();
                     }
-                } else if ( adminRole.equals(UserConstants.GA) ) {
-                    if ( !user.getString("role").equals(UserConstants.USER) && !user.getString("role").equals(UserConstants.GBO) ) {
+                } else if ( adminRole.equals(ServerConstants.GA) ) {
+                    if ( !user.getString("role").equals(ServerConstants.USER) && !user.getString("role").equals(ServerConstants.GBO) ) {
                         txn.rollback();
                         LOG.warning("Data change: " + token.username + " cannot change GA or SU users data.");
                         return Response.status(Status.UNAUTHORIZED).entity("GA users cannot change data of GA or SU users.").build();
-                    } else if ( data.role.equals(UserConstants.GA) || data.role.equals(UserConstants.SU) ) {
+                    } else if ( data.role.equals(ServerConstants.GA) || data.role.equals(ServerConstants.SU) ) {
                         txn.rollback();
                         LOG.warning("Data change: " + token.username + " cannot change users' role to GA or SU roles.");
                         return Response.status(Status.UNAUTHORIZED).entity("GA users cannot change users' role to GA or SU roles.").build();
                     }
-                } else if ( adminRole.equals(UserConstants.SU) ) {
-                    if ( !user.getString("role").equals(UserConstants.USER) && !user.getString("role").equals(UserConstants.GBO) && !user.getString("role").equals(UserConstants.GA) ) {
+                } else if ( adminRole.equals(ServerConstants.SU) ) {
+                    if ( !user.getString("role").equals(ServerConstants.USER) && !user.getString("role").equals(ServerConstants.GBO) && !user.getString("role").equals(ServerConstants.GA) ) {
                         txn.rollback();
                         LOG.warning("Data change: " + token.username + " cannot change SU users data.");
                         return Response.status(Status.UNAUTHORIZED).entity("SU users cannot change data of SU users.").build();
@@ -272,8 +278,8 @@ public class UserResource {
     public Response changeRole(RoleData data) {
         AuthToken token = data.token;
         LOG.fine("Role change: attempt to change role of " + data.username + " by " + token.username + ".");
-        if ( token.role.equals(UserConstants.USER) || token.role.equals(UserConstants.GBO) || 
-            ( token.role.equals(UserConstants.GA) && (data.role.equals(UserConstants.GA) || data.role.equals(UserConstants.SU) ) ) ) {
+        if ( token.role.equals(ServerConstants.USER) || token.role.equals(ServerConstants.GBO) || 
+            ( token.role.equals(ServerConstants.GA) && (data.role.equals(ServerConstants.GA) || data.role.equals(ServerConstants.SU) ) ) ) {
             LOG.warning("Role change: unauthorized attempt to change the role of a user.");
             return Response.status(Status.UNAUTHORIZED).entity("User is not authorized to change user accounts role.").build();
         }
@@ -360,7 +366,7 @@ public class UserResource {
     public Response changeState(UsernameData data) {
         AuthToken token = data.token;
         LOG.fine("State changing attempt of: " + data.username + " by " + token.username);
-        if ( token.role.equals(UserConstants.USER) ) {
+        if ( token.role.equals(ServerConstants.USER) ) {
             LOG.warning("State change: unauthorized attempt to change the state of a user.");
             return Response.status(Status.UNAUTHORIZED).entity("USER roles cannot change any user states.").build();
         }
@@ -382,21 +388,21 @@ public class UserResource {
             String adminRole = admin.getString("role");
             int validation = token.isStillValid(admin.getString("tokenID"), adminRole);
             if ( validation == 1 ) {
-                if ( adminRole.equals(UserConstants.GBO) ) {
-                    if ( !user.getString("role").equals(UserConstants.USER) ) { // GBO users can only change USER states
+                if ( adminRole.equals(ServerConstants.GBO) ) {
+                    if ( !user.getString("role").equals(ServerConstants.USER) ) { // GBO users can only change USER states
                         txn.rollback();
                         LOG.warning("State change: " + token.username + " attmepted to change the state of a non USER role.");
                         return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change non USER roles' states.").build();
                     }
-                } else if ( adminRole.equals(UserConstants.GA) ) {
+                } else if ( adminRole.equals(ServerConstants.GA) ) {
                     String userRole = user.getString("role");
-                    if ( !userRole.equals(UserConstants.USER) && !userRole.equals(UserConstants.GBO) ) { // GA users can change USER and GBO states
+                    if ( !userRole.equals(ServerConstants.USER) && !userRole.equals(ServerConstants.GBO) ) { // GA users can change USER and GBO states
                         txn.rollback();
                         LOG.warning("State change: " + token.username + " attmepted to change the state of a non USER or GBO role.");
                         return Response.status(Status.UNAUTHORIZED).entity("GA users cannot change non USER and GBO roles' states.").build();
                     }
-                } else if ( adminRole.equals(UserConstants.SU) ) {                    
-                } else if ( adminRole.equals(UserConstants.USER) ) {
+                } else if ( adminRole.equals(ServerConstants.SU) ) {                    
+                } else if ( adminRole.equals(ServerConstants.USER) ) {
                     txn.rollback();
                     LOG.warning("State change: " + token.username + " attmepted to change the state of a user as a USER role.");
                     return Response.status(Status.UNAUTHORIZED).entity("USER users cannot change states.").build();
@@ -418,7 +424,7 @@ public class UserResource {
                     .set("postalcode", user.getString("postalcode"))
                     .set("fiscal", user.getString("fiscal"))
                     .set("role", user.getString("role"))
-                    .set("state", user.getString("state").equals(UserConstants.ACTIVE) ? UserConstants.INACTIVE : UserConstants.ACTIVE)
+                    .set("state", user.getString("state").equals(ServerConstants.ACTIVE) ? ServerConstants.INACTIVE : ServerConstants.ACTIVE)
                     .set("userCreationTime", user.getTimestamp("userCreationTime"))
                     .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
                     .set("photo", StringValue.newBuilder(user.getString("photo")).setExcludeFromIndexes(true).build())
@@ -464,7 +470,7 @@ public class UserResource {
     public Response removeUser(UsernameData data) {
         AuthToken token = data.token;
         LOG.fine("Remove User: removal attempt of " + data.username + " by " + token.username + ".");
-        if ( token.role.equals(UserConstants.GBO) || ( token.role.equals(UserConstants.USER) && !token.username.equals(data.username) ) ) {
+        if ( token.role.equals(ServerConstants.GBO) || ( token.role.equals(ServerConstants.USER) && !token.username.equals(data.username) ) ) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
         Transaction txn = datastore.newTransaction();
@@ -488,21 +494,21 @@ public class UserResource {
             String adminRole = admin.getString("role");
             int validation = token.isStillValid(admin.getString("tokenID"), adminRole);
             if ( validation == 1 ) {
-                if ( adminRole.equals(UserConstants.USER) ) {
+                if ( adminRole.equals(ServerConstants.USER) ) {
                     String role = user.getString("role");
-                    if ( !role.equals(UserConstants.USER) || !user.equals(admin) ) {
+                    if ( !role.equals(ServerConstants.USER) || !user.equals(admin) ) {
                         txn.rollback();
                         LOG.warning("Remove User: " + token.username + " (USER role) attempted to delete other user.");
                         return Response.status(Status.UNAUTHORIZED).entity("USER roles cannot remove other users from the database.").build();
                     }
-                } else if ( adminRole.equals(UserConstants.GA) ) {
+                } else if ( adminRole.equals(ServerConstants.GA) ) {
                     String role = user.getString("role");
-                    if ( !role.equals(UserConstants.GBO) && !role.equals(UserConstants.USER) ) {
+                    if ( !role.equals(ServerConstants.GBO) && !role.equals(ServerConstants.USER) ) {
                         txn.rollback();
                         LOG.warning("Remove User: " + token.username + " (GA role) attempted to delete SU or GA user.");
                         return Response.status(Status.UNAUTHORIZED).entity("GA roles cannot remove GA or SU users from the database.").build();
                     }
-                } else if ( adminRole.equals(UserConstants.SU) ) {
+                } else if ( adminRole.equals(ServerConstants.SU) ) {
                 } else {
                     txn.rollback();
                     LOG.severe("Remove User: Unrecognized role.");

@@ -10,9 +10,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.*;
 
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.Transaction;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
+import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 
 @Path("/logout")
 public class LogoutResource {
@@ -21,7 +27,7 @@ public class LogoutResource {
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
 	/** The data store to store users in */
-	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+	private static final Datastore datastore = ServerConstants.datastore;
 
 	/** The User kind key factory */
 	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");

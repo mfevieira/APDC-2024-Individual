@@ -12,7 +12,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.*;
 
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.ListValue;
+import com.google.cloud.datastore.ProjectionEntity;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.OrderBy;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
@@ -20,7 +27,7 @@ import com.google.gson.Gson;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.User;
-import pt.unl.fct.di.apdc.projeto.util.UserConstants;
+import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 import pt.unl.fct.di.apdc.projeto.util.UserQuery;
 
 @Path("/list")
@@ -30,7 +37,7 @@ public class ListUserResource {
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
 	/** The data store to store users in */
-	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+	private static final Datastore datastore = ServerConstants.datastore;
 
 	/** The User kind key factory */
 	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
@@ -59,13 +66,13 @@ public class ListUserResource {
             int validation = token.isStillValid(user.getString("tokenID"), userRole);
             if ( validation == 1 ) {
                 Query<Entity> query;
-                if ( userRole.equals(UserConstants.USER) ) {
+                if ( userRole.equals(ServerConstants.USER) ) {
                     Query<ProjectionEntity> projectionQuery = Query.newProjectionEntityQueryBuilder()
 				            .setKind("User")
 				            .setFilter(CompositeFilter.and(
-                                        PropertyFilter.eq("state", UserConstants.ACTIVE),
-                                        PropertyFilter.eq("profile", UserConstants.PUBLIC),
-                                        PropertyFilter.eq("role", UserConstants.USER)))
+                                        PropertyFilter.eq("state", ServerConstants.ACTIVE),
+                                        PropertyFilter.eq("profile", ServerConstants.PUBLIC),
+                                        PropertyFilter.eq("role", ServerConstants.USER)))
 				            .setProjection("username", "email", "name")
 				            .build();
                     List<UserQuery> projection = new LinkedList<>();
@@ -76,18 +83,18 @@ public class ListUserResource {
                     }
 				    LOG.info("List users: " + token.username + " received list of active and public USER users.");
 				    return Response.ok(g.toJson(projection)).build();
-                } else if ( userRole.equals(UserConstants.GBO) ) {
+                } else if ( userRole.equals(ServerConstants.GBO) ) {
                     query = Query.newEntityQueryBuilder()
 				            .setKind("User")
-				            .setFilter(PropertyFilter.eq("role", UserConstants.USER))
+				            .setFilter(PropertyFilter.eq("role", ServerConstants.USER))
 				            .build();
-                } else if ( userRole.equals(UserConstants.GA) ) {
+                } else if ( userRole.equals(ServerConstants.GA) ) {
                     query = Query.newEntityQueryBuilder()
 				            .setKind("User")
-				            .setFilter(PropertyFilter.in("role", ListValue.of(UserConstants.USER, UserConstants.GBO, UserConstants.GA)))
+				            .setFilter(PropertyFilter.in("role", ListValue.of(ServerConstants.USER, ServerConstants.GBO, ServerConstants.GA)))
                             .setOrderBy(OrderBy.desc("role"))
 				            .build();
-                } else if ( userRole.equals(UserConstants.SU) ) {
+                } else if ( userRole.equals(ServerConstants.SU) ) {
                     query = Query.newEntityQueryBuilder()
 				            .setKind("User")
                             .setOrderBy(OrderBy.desc("role"))

@@ -13,11 +13,16 @@ import javax.ws.rs.core.Response.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.google.cloud.Timestamp;
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
-import pt.unl.fct.di.apdc.projeto.util.UserConstants;
+import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 import pt.unl.fct.di.apdc.projeto.util.RegisterData;
 
 @Path("/register")
@@ -27,7 +32,7 @@ public class RegisterResource {
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
 	/** The data store to store users in */
-	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+	private static final Datastore datastore = ServerConstants.datastore;
 
 	/** The User kind key factory */
 	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
@@ -53,21 +58,21 @@ public class RegisterResource {
 		try {
 			Key userKey = userKeyFactory.newKey(data.username);
 			if (txn.get(userKey) == null) {
-				AuthToken token = new AuthToken(data.username, UserConstants.USER);
+				AuthToken token = new AuthToken(data.username, ServerConstants.USER);
 				Entity user = Entity.newBuilder(userKey)
 						.set("username", data.username)
 						.set("password", DigestUtils.sha3_512Hex(data.password))
 						.set("email", data.email)
 						.set("name", data.name)
 						.set("phone", data.phone)
-						.set("profile", data.profile == null || data.profile.trim().isEmpty() ? UserConstants.PRIVATE : data.profile)
+						.set("profile", data.profile == null || data.profile.trim().isEmpty() ? ServerConstants.PRIVATE : data.profile)
 						.set("work", data.work == null || data.work.trim().isEmpty() ? "" : data.work)
 						.set("workplace", data.workplace == null || data.workplace.trim().isEmpty() ? "" : data.workplace)
 						.set("address", data.address == null || data.address.trim().isEmpty() ? "" : data.address)
 						.set("postalcode", data.postalcode == null || data.postalcode.trim().isEmpty() ? "" : data.postalcode)
 						.set("fiscal", data.fiscal == null || data.fiscal.trim().isEmpty() ? "" : data.fiscal)
-						.set("role", UserConstants.USER)
-						.set("state", UserConstants.INACTIVE)
+						.set("role", ServerConstants.USER)
+						.set("state", ServerConstants.INACTIVE)
 						.set("userCreationTime", Timestamp.now())
 						.set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
 						.set("photo", StringValue.newBuilder(data.photo == null || data.photo.trim().isEmpty() ? "" : data.photo).setExcludeFromIndexes(true).build())

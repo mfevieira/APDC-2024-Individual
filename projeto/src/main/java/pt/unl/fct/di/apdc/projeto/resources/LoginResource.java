@@ -14,7 +14,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
@@ -25,6 +24,7 @@ import com.google.gson.Gson;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.LoginData;
+import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 
 @Path("/login")
 public class LoginResource {
@@ -38,7 +38,7 @@ public class LoginResource {
 	public static final long HOURS24 = 1000*60*60*24;
 
 	/** The data store to store users in */
-	private static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+	private static final Datastore datastore = ServerConstants.datastore;
 	
 	/** The key factory for users */
 	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
