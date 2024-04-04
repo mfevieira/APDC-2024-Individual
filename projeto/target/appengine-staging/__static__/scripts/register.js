@@ -61,13 +61,11 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(async response => {
             if ( response.ok ) {
-                const token = await response.json();
-                localStorage.setItem('authToken', JSON.stringify(token));
                 console.log('User registered.')
                 window.location.href = 'index.html';
             } else {
                 const errorMessage = await response.text();
-                alert('Fetch error: ', errorMessage);
+                alert('Fetch error: ' + errorMessage);
             }
         });
     }

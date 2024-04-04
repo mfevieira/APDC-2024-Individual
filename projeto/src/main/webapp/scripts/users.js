@@ -27,3 +27,32 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Error fetching users: ' + error.message);
     });
 });
+
+function checkLoginStatus() {
+    var authToken = localStorage.getItem('authToken');
+    if ( authToken != null ) {
+        fetch('/rest/login/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: authToken
+        })
+        .then(response => {
+            if (response.ok) {
+            } else {
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking login status: ', error);
+        });
+    } else {
+        window.location.href = 'index.html';
+    }
+}
+
+window.onload = function() {
+    checkLoginStatus();
+};

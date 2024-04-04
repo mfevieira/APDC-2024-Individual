@@ -2,7 +2,6 @@ pt\unl\fct\di\apdc\projeto\util\PasswordData.class
 pt\unl\fct\di\apdc\projeto\resources\ListUserResource.class
 pt\unl\fct\di\apdc\projeto\util\RoleData.class
 pt\unl\fct\di\apdc\projeto\util\UsernameData.class
-pt\unl\fct\di\apdc\projeto\util\UserConstants.class
 pt\unl\fct\di\apdc\projeto\resources\LoginResource.class
 pt\unl\fct\di\apdc\projeto\util\LoginData.class
 pt\unl\fct\di\apdc\projeto\resources\RegisterResource.class

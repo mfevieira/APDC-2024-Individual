@@ -4,7 +4,6 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.PathElement;
 
 public class ServerConstants {
 
@@ -18,12 +17,15 @@ public class ServerConstants {
 
     private final KeyFactory userKeyFactory;
 
+    private final KeyFactory tokenKeyFactory;
+
     private static ServerConstants singleton = null;
 
     private ServerConstants() {
-        this.datastore = DatastoreOptions.newBuilder().setProjectId("apdc-64320").setHost("localhost:8081").build().getService();
-        //this.datastore = DatastoreOptions.getDefaultInstance().getService();
+        //this.datastore = DatastoreOptions.newBuilder().setProjectId("apdc-64320").setHost("localhost:8081").build().getService();
+        this.datastore = DatastoreOptions.getDefaultInstance().getService();
         this.userKeyFactory = datastore.newKeyFactory().setKind("User");
+        this.tokenKeyFactory = datastore.newKeyFactory().setKind("Token");
     }
 
     public static ServerConstants getServerConstants() {
@@ -42,6 +44,6 @@ public class ServerConstants {
     }
 
     public Key getTokenKey(String username) {
-        return datastore.allocateId(datastore.newKeyFactory().addAncestor(PathElement.of("User", username)).setKind("Token").newKey());
+        return tokenKeyFactory.newKey(username);
     }
 }

@@ -3,6 +3,13 @@ document.addEventListener('DOMContentLoaded', function() {
     var deleteButton = document.getElementById('deleteButton');
     var confirmDeleteButton = document.getElementById('confirmDeleteButton');
 
+
+    var authToken = localStorage.getItem('authToken');
+    var token = JSON.parse(authToken);
+    var username = token.username;
+    var welcomeHeader = document.querySelector('h1');
+    welcomeHeader.textContent = 'Welcome ' + username + '!';
+
     tokenButton.addEventListener('click', function(event) {
         event.preventDefault();
         var authToken = localStorage.getItem('authToken');
@@ -57,3 +64,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function checkLoginStatus() {
+    var authToken = localStorage.getItem('authToken');
+    if ( authToken != null ) {
+        fetch('/rest/login/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: authToken
+        })
+        .then(response => {
+            if (response.ok) {
+            } else {
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking login status: ', error);
+        });
+    } else {
+        window.location.href = 'index.html';
+    }
+}
+
+window.onload = function() {
+    checkLoginStatus();
+};

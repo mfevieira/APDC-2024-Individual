@@ -108,7 +108,9 @@ public class UserResource {
                         txn.rollback();
                         LOG.warning("Data change: " + token.username + " cannot change non USER users data.");
                         return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change data of non USER users.").build();
-                    } else if ( data.role != null || !data.role.trim().isEmpty() ) {
+                    }
+                    if ( data.role == null || data.role.trim().isEmpty() ) {
+                    } else {
                         txn.rollback();
                         LOG.warning("Data change: " + token.username + " cannot change users' role.");
                         return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change users' role.").build();
@@ -386,14 +388,14 @@ public class UserResource {
             String adminRole = admin.getString("role");
             int validation = token.isStillValid(authToken, adminRole);
             if ( validation == 1 ) {
+                String userRole = user.getString("role");
                 if ( adminRole.equals(ServerConstants.GBO) ) {
-                    if ( !user.getString("role").equals(ServerConstants.USER) ) { // GBO users can only change USER states
+                    if ( !userRole.equals(ServerConstants.USER) ) { // GBO users can only change USER states
                         txn.rollback();
                         LOG.warning("State change: " + token.username + " attmepted to change the state of a non USER role.");
                         return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change non USER roles' states.").build();
                     }
                 } else if ( adminRole.equals(ServerConstants.GA) ) {
-                    String userRole = user.getString("role");
                     if ( !userRole.equals(ServerConstants.USER) && !userRole.equals(ServerConstants.GBO) ) { // GA users can change USER and GBO states
                         txn.rollback();
                         LOG.warning("State change: " + token.username + " attmepted to change the state of a non USER or GBO role.");
@@ -467,8 +469,10 @@ public class UserResource {
     public Response removeUser(UsernameData data) {
         AuthToken token = data.token;
         LOG.fine("Remove User: removal attempt of " + data.username + " by " + token.username + ".");
-        if ( token.role.equals(ServerConstants.GBO) || ( token.role.equals(ServerConstants.USER) && !token.username.equals(data.username) ) ) {
-            return Response.status(Status.UNAUTHORIZED).build();
+        if ( token.role.equals(ServerConstants.GBO) ) {
+            return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot remove any accounts.").build();
+        } else if ( token.role.equals(ServerConstants.USER) && !token.username.equals(data.username) ) {
+            return Response.status(Status.UNAUTHORIZED).entity("USER users cannot remove any accounts other than their own.").build();
         }
         Transaction txn = datastore.newTransaction();
         try {
@@ -491,21 +495,24 @@ public class UserResource {
             String adminRole = admin.getString("role");
             int validation = token.isStillValid(authToken, adminRole);
             if ( validation == 1 ) {
+                String role = user.getString("role");
                 if ( adminRole.equals(ServerConstants.USER) ) {
-                    String role = user.getString("role");
                     if ( !role.equals(ServerConstants.USER) || !user.equals(admin) ) {
                         txn.rollback();
                         LOG.warning("Remove User: " + token.username + " (USER role) attempted to delete other user.");
                         return Response.status(Status.UNAUTHORIZED).entity("USER roles cannot remove other users from the database.").build();
                     }
                 } else if ( adminRole.equals(ServerConstants.GA) ) {
-                    String role = user.getString("role");
                     if ( !role.equals(ServerConstants.GBO) && !role.equals(ServerConstants.USER) ) {
                         txn.rollback();
                         LOG.warning("Remove User: " + token.username + " (GA role) attempted to delete SU or GA user.");
                         return Response.status(Status.UNAUTHORIZED).entity("GA roles cannot remove GA or SU users from the database.").build();
                     }
                 } else if ( adminRole.equals(ServerConstants.SU) ) {
+                } else if ( adminRole.equals(ServerConstants.GBO) ) {
+                    txn.rollback();
+                    LOG.warning("Remove User: " + token.username + " (GBO role) attempted to delete user.");
+                    return Response.status(Status.UNAUTHORIZED).entity("GBO roles cannot remove users from the database.").build();
                 } else {
                     txn.rollback();
                     LOG.severe("Remove User: Unrecognized role.");

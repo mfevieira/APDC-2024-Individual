@@ -39,7 +39,7 @@ public class AuthToken {
 		long entityExpirationDate = token.getLong("expirationDate");
 		if ( !entityRole.equals(this.role) || !entityUsername.equals(this.username) || !entityTokenID.equals(this.tokenID) || 
 				entityCreationDate != this.creationDate || entityExpirationDate != this.expirationDate ) {
-					return -2;
+			return -2;
 		} else if ( !this.role.equals(role) ) {
 			return -1;
 		} else if ( System.currentTimeMillis() >= this.expirationDate ) {

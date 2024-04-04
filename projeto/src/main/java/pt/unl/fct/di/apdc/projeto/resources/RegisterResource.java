@@ -18,9 +18,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
-import com.google.gson.Gson;
 
-import pt.unl.fct.di.apdc.projeto.util.AuthToken;
 import pt.unl.fct.di.apdc.projeto.util.ServerConstants;
 import pt.unl.fct.di.apdc.projeto.util.RegisterData;
 
@@ -35,9 +33,6 @@ public class RegisterResource {
 
 	/** The data store to store users in */
 	private static final Datastore datastore = serverConstants.getDatastore();
-
-	/** The converter to JSON */
-	private final Gson g = new Gson();
 
 	public RegisterResource() {
 	}
@@ -56,16 +51,7 @@ public class RegisterResource {
 		Transaction txn = datastore.newTransaction();
 		try {
 			Key userKey = serverConstants.getUserKey(data.username);
-			Key tokenKey = serverConstants.getTokenKey(data.username);
 			if ( txn.get(userKey) == null ) {
-				AuthToken authToken = new AuthToken(data.username, ServerConstants.USER);
-				Entity token = Entity.newBuilder(tokenKey)
-						.set("username", authToken.username)
-						.set("role", authToken.role)
-						.set("tokenID", authToken.tokenID)
-						.set("creationDate", authToken.creationDate)
-						.set("expirationDate", authToken.expirationDate)
-						.build();
 				Entity user = Entity.newBuilder(userKey)
 						.set("username", data.username)
 						.set("password", DigestUtils.sha3_512Hex(data.password))
@@ -83,10 +69,10 @@ public class RegisterResource {
 						.set("userCreationTime", Timestamp.now())
 						.set("photo", StringValue.newBuilder(data.photo == null || data.photo.trim().isEmpty() ? "" : data.photo).setExcludeFromIndexes(true).build())
 						.build();
-				txn.add(user, token);
+				txn.add(user);
 				txn.commit();
 				LOG.fine("Register: " + data.username + "'s was registered in the database.");
-				return Response.ok(g.toJson(authToken)).build();
+				return Response.ok().build();
 			} else {
 				txn.rollback();
 				LOG.fine("Register: duplicate username.");

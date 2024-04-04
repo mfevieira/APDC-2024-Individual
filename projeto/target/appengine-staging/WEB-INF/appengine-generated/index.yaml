@@ -1,15 +1,4 @@
 indexes:
-- kind: "LoginStats"
-  ancestor: yes
-  properties:
-  - name: "successfulLogins"
-    direction: desc
-  - name: "failedLogins"
-    direction: desc
-  - name: "suserFirstLogin"
-    direction: desc
-  - name: "userLastLogin"
-    direction: desc
 - kind: "User"
   properties:
   - name: "username"
@@ -44,7 +33,13 @@ indexes:
   properties:
   - name: "profile"
   - name: "role"
+    direction: desc
   - name: "state"
   - name: "email"
   - name: "name"
   - name: "username"
+- kind: "User"
+  properties:
+  - name: "role"
+  - name: "role"
+    direction: desc
