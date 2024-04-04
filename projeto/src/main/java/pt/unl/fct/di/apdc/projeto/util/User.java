@@ -32,8 +32,6 @@ public class User {
 
     public Date userCreationTime;
 
-    public String tokenID;
-
     public String photo;
 
 
@@ -42,7 +40,7 @@ public class User {
     }
 
     public User(String username, String password, String email, String name, String phone, String profile, String work, String workplace, 
-                String address, String postalcode, String fiscal, String role, String state, Date userCreationTime, String tokenID, String photo) {
+                String address, String postalcode, String fiscal, String role, String state, Date userCreationTime, String photo) {
         this.username = username;
 		this.password = password;
 		this.email = email;
@@ -57,7 +55,6 @@ public class User {
         this.role = role;
         this.state = state;
         this.userCreationTime = userCreationTime;
-        this.tokenID = tokenID;
         this.photo = photo;
     }
 }

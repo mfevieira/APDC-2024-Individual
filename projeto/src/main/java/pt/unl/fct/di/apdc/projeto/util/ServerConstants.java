@@ -2,6 +2,9 @@ package pt.unl.fct.di.apdc.projeto.util;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.PathElement;
 
 public class ServerConstants {
 
@@ -11,7 +14,34 @@ public class ServerConstants {
 
     public static final String PUBLIC = "PUBLIC", PRIVATE = "PRIVATE";
 
-    public static final Datastore datastore = DatastoreOptions.newBuilder().setProjectId("apdc-64320").setHost("localhost:8081").build().getService();
+    private final Datastore datastore;
 
-    //public static final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
+    private final KeyFactory userKeyFactory;
+
+    private static ServerConstants singleton = null;
+
+    private ServerConstants() {
+        this.datastore = DatastoreOptions.newBuilder().setProjectId("apdc-64320").setHost("localhost:8081").build().getService();
+        //this.datastore = DatastoreOptions.getDefaultInstance().getService();
+        this.userKeyFactory = datastore.newKeyFactory().setKind("User");
+    }
+
+    public static ServerConstants getServerConstants() {
+        if ( singleton == null ) {
+            singleton = new ServerConstants();
+        }
+        return singleton;
+    }
+
+    public Datastore getDatastore() {
+        return this.datastore;
+    }
+
+    public Key getUserKey(String username) {
+        return userKeyFactory.newKey(username);
+    }
+
+    public Key getTokenKey(String username) {
+        return datastore.allocateId(datastore.newKeyFactory().addAncestor(PathElement.of("User", username)).setKind("Token").newKey());
+    }
 }

@@ -13,8 +13,6 @@ import javax.ws.rs.core.Response.*;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
 
 import pt.unl.fct.di.apdc.projeto.util.AuthToken;
@@ -26,11 +24,11 @@ public class LogoutResource {
     /** Logger Object */
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
-	/** The data store to store users in */
-	private static final Datastore datastore = ServerConstants.datastore;
+	/** Class that stores the server constants to use in operations */
+	public static final ServerConstants serverConstants = ServerConstants.getServerConstants();
 
-	/** The User kind key factory */
-	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
+	/** The data store to store users in */
+	private static final Datastore datastore = serverConstants.getDatastore();
 
     public LogoutResource() {
 
@@ -44,35 +42,18 @@ public class LogoutResource {
         LOG.fine("Logout: " + token.username + " attempt to logout.");
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = userKeyFactory.newKey(token.username);
+            Key userKey = serverConstants.getUserKey(token.username);
+            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
             if ( user == null ) {
                 txn.rollback();
 				LOG.warning("Logout: " + token.username + " not registered as user.");
                 return Response.status(Status.NOT_FOUND).entity("No such user exists.").build();
             }
-            String userRole = user.getString("role");
-            int validation = token.isStillValid(user.getString("tokenID"), userRole);
+            Entity authToken = txn.get(tokenKey);
+            int validation = token.isStillValid(authToken, user.getString("role"));
             if ( validation == 1 ) {
-                user = Entity.newBuilder(userKey)
-						.set("username", user.getString("username"))
-						.set("password", user.getString("password"))
-						.set("email", user.getString("email"))
-						.set("name", user.getString("name"))
-						.set("phone", user.getString("phone"))
-						.set("profile", user.getString("profile"))
-						.set("work", user.getString("work"))
-						.set("workplace", user.getString("workplace"))
-						.set("address", user.getString("address"))
-						.set("postalcode", user.getString("postalcode"))
-						.set("fiscal", user.getString("fiscal"))
-						.set("role", user.getString("role"))
-						.set("state", user.getString("state"))
-						.set("userCreationTime", user.getTimestamp("userCreationTime"))
-						.set("tokenID", StringValue.newBuilder("").setExcludeFromIndexes(true).build())
-						.set("photo", StringValue.newBuilder(user.getString("photo")).setExcludeFromIndexes(true).build())
-						.build();
-                txn.put(user);
+                txn.delete(tokenKey);
                 txn.commit();
                 LOG.fine("Logout: " + token.username + " logged out.");
                 return Response.ok().entity("User logged out.").build();
@@ -84,10 +65,10 @@ public class LogoutResource {
                 txn.rollback();
                 LOG.warning("Logout: " + token.username + "'s' authentication token has different role.");
                 return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
-            } else if ( validation == -2 ) { // tokenID is false
+            } else if ( validation == -2 ) { // token is false
                 txn.rollback();
-                LOG.severe("Logout: " + token.username + "'s' authentication token has different tokenID, possible attempted breach.");
-                return Response.status(Status.UNAUTHORIZED).entity("TokenId incorrect, make new login").build();
+                LOG.severe("Logout: " + token.username + "'s' authentication token is different, possible attempted breach.");
+                return Response.status(Status.UNAUTHORIZED).entity("Token is incorrect, make new login").build();
             } else {
                 txn.rollback();
                 LOG.severe("Logout: " + token.username + "'s' authentication token validity error.");

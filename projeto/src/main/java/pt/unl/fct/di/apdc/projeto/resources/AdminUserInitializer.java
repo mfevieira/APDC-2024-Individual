@@ -26,12 +26,15 @@ public class AdminUserInitializer extends HttpServlet {
     /** Logger Object */
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
+	/** Class that stores the server constants to use in operations */
+	public static final ServerConstants serverConstants = ServerConstants.getServerConstants();
+
 	/** The data store to store users in */
-	private static final Datastore datastore = ServerConstants.datastore;
+	private static final Datastore datastore = serverConstants.getDatastore();
 
     @Override
     public void init() throws ServletException {
-        Key rootKey = datastore.newKeyFactory().setKind("User").newKey("root");
+        Key rootKey = serverConstants.getUserKey("root");
         Transaction txn = datastore.newTransaction();
         try {
             Entity root = txn.get(rootKey);
@@ -51,7 +54,6 @@ public class AdminUserInitializer extends HttpServlet {
 						.set("role", ServerConstants.SU)
 						.set("state", ServerConstants.ACTIVE)
 						.set("userCreationTime", Timestamp.now())
-						.set("tokenID", StringValue.newBuilder("").setExcludeFromIndexes(true).build())
 						.set("photo", StringValue.newBuilder("").setExcludeFromIndexes(true).build())
 						.build();
                 txn.put(root);

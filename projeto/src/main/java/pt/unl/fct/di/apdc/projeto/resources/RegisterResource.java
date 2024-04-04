@@ -16,7 +16,6 @@ import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
@@ -31,11 +30,11 @@ public class RegisterResource {
 	/** Logger Object */
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
-	/** The data store to store users in */
-	private static final Datastore datastore = ServerConstants.datastore;
+	/** Class that stores the server constants to use in operations */
+	public static final ServerConstants serverConstants = ServerConstants.getServerConstants();
 
-	/** The User kind key factory */
-	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
+	/** The data store to store users in */
+	private static final Datastore datastore = serverConstants.getDatastore();
 
 	/** The converter to JSON */
 	private final Gson g = new Gson();
@@ -56,9 +55,17 @@ public class RegisterResource {
 		}
 		Transaction txn = datastore.newTransaction();
 		try {
-			Key userKey = userKeyFactory.newKey(data.username);
-			if (txn.get(userKey) == null) {
-				AuthToken token = new AuthToken(data.username, ServerConstants.USER);
+			Key userKey = serverConstants.getUserKey(data.username);
+			Key tokenKey = serverConstants.getTokenKey(data.username);
+			if ( txn.get(userKey) == null ) {
+				AuthToken authToken = new AuthToken(data.username, ServerConstants.USER);
+				Entity token = Entity.newBuilder(tokenKey)
+						.set("username", authToken.username)
+						.set("role", authToken.role)
+						.set("tokenID", authToken.tokenID)
+						.set("creationDate", authToken.creationDate)
+						.set("expirationDate", authToken.expirationDate)
+						.build();
 				Entity user = Entity.newBuilder(userKey)
 						.set("username", data.username)
 						.set("password", DigestUtils.sha3_512Hex(data.password))
@@ -74,13 +81,12 @@ public class RegisterResource {
 						.set("role", ServerConstants.USER)
 						.set("state", ServerConstants.INACTIVE)
 						.set("userCreationTime", Timestamp.now())
-						.set("tokenID", StringValue.newBuilder(token.tokenID).setExcludeFromIndexes(true).build())
 						.set("photo", StringValue.newBuilder(data.photo == null || data.photo.trim().isEmpty() ? "" : data.photo).setExcludeFromIndexes(true).build())
 						.build();
-				txn.add(user);
+				txn.add(user, token);
 				txn.commit();
 				LOG.fine("Register: " + data.username + "'s was registered in the database.");
-				return Response.ok(g.toJson(token)).build();
+				return Response.ok(g.toJson(authToken)).build();
 			} else {
 				txn.rollback();
 				LOG.fine("Register: duplicate username.");

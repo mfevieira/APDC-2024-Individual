@@ -15,8 +15,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
@@ -34,11 +32,11 @@ public class UserResource {
     /** Logger Object */
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
 
-	/** The data store to store users in */
-	private static final Datastore datastore = ServerConstants.datastore;
+	/** Class that stores the server constants to use in operations */
+	public static final ServerConstants serverConstants = ServerConstants.getServerConstants();
 
-	/** The User kind key factory */
-	private static final KeyFactory userKeyFactory = datastore.newKeyFactory().setKind("User");
+	/** The data store to store users in */
+	private static final Datastore datastore = serverConstants.getDatastore();
 	
 	/** The converter to JSON */
 	private final Gson g = new Gson();
@@ -65,8 +63,9 @@ public class UserResource {
 		}
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = userKeyFactory.newKey(data.username);
-            Key adminKey = userKeyFactory.newKey(token.username);
+            Key userKey = serverConstants.getUserKey(data.username);
+            Key adminKey = serverConstants.getUserKey(token.username);
+            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
             if ( user == null ) {
@@ -78,8 +77,9 @@ public class UserResource {
 				LOG.warning("Data change: " + token.username + " not registered as user.");
                 return Response.status(Status.NOT_FOUND).entity("No such user exists.").build();
             }
+            Entity authToken = txn.get(tokenKey);
             String adminRole = admin.getString("role");
-            int validation = token.isStillValid(admin.getString("tokenID"), adminRole);
+            int validation = token.isStillValid(authToken, admin.getString("role"));
             if ( validation == 1 ) {
                 if ( adminRole.equals(ServerConstants.USER) ) {
                     user = Entity.newBuilder(userKey)
@@ -97,7 +97,6 @@ public class UserResource {
                         .set("role", user.getString("role"))
                         .set("state", user.getString("state"))
                         .set("userCreationTime", user.getTimestamp("userCreationTime"))
-                        .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
 						.set("photo", StringValue.newBuilder(data.photo == null || data.photo.trim().isEmpty() ? user.getString("photo") : data.photo).setExcludeFromIndexes(true).build())
 						.build();
                     txn.update(user);
@@ -150,7 +149,6 @@ public class UserResource {
                         .set("role", data.role == null || data.role.trim().isEmpty() ? user.getString("role") : data.role)
                         .set("state", data.state == null || data.state.trim().isEmpty() ? user.getString("state") : data.state)
                         .set("userCreationTime", user.getTimestamp("userCreationTime"))
-                        .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
 						.set("photo", StringValue.newBuilder(data.photo == null || data.photo.trim().isEmpty() ? user.getString("photo") : data.photo).setExcludeFromIndexes(true).build())
                         .build();
                 txn.update(user);
@@ -165,10 +163,10 @@ public class UserResource {
                 txn.rollback();
                 LOG.warning("Data change: " + token.username + "'s' authentication token has different role.");
                 return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
-            } else if ( validation == -2 ) { // tokenID is false
+            } else if ( validation == -2 ) { // token is false
                 txn.rollback();
-                LOG.severe("Data change: " + token.username + "'s' authentication token has different tokenID, possible attempted breach.");
-                return Response.status(Status.UNAUTHORIZED).entity("TokenId incorrect, make new login").build();
+                LOG.severe("Data change: " + token.username + "'s' authentication token is different, possible attempted breach.");
+                return Response.status(Status.UNAUTHORIZED).entity("Token is incorrect, make new login").build();
             } else {
                 txn.rollback();
                 LOG.severe("Data change: " + token.username + "'s' authentication token validity error.");
@@ -200,20 +198,19 @@ public class UserResource {
         }
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = userKeyFactory.newKey(token.username);
+            Key userKey = serverConstants.getUserKey(token.username);
+            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
             if ( user == null ) {
                 txn.rollback();
 				LOG.warning("Password change: " + token.username + " not registered as user.");
                 return Response.status(Status.NOT_FOUND).entity("No such user exists.").build();
             }
-            String userRole = user.getString("role");
-            int validation = token.isStillValid(user.getString("tokenID"), userRole);
+            Entity authToken = txn.get(tokenKey);
+            int validation = token.isStillValid(authToken, user.getString("role"));
             if ( validation == 1 ) {
                 String hashedPassword = (String) user.getString("password");
                 if ( hashedPassword.equals(DigestUtils.sha3_512Hex(data.oldPassword)) ) {
-                    String username = token.username;
-                    token = new AuthToken(username, userRole);
                     user = Entity.newBuilder(user)
                             .set("username", user.getString("username"))
                             .set("password", DigestUtils.sha3_512Hex(data.newPassword))
@@ -229,7 +226,6 @@ public class UserResource {
                             .set("role", user.getString("role"))
                             .set("state", user.getString("state"))
                             .set("userCreationTime", user.getTimestamp("userCreationTime"))
-                            .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
                             .set("photo", StringValue.newBuilder(user.getString("photo")).setExcludeFromIndexes(true).build())
                             .build();
                     txn.update(user);
@@ -249,10 +245,10 @@ public class UserResource {
                 txn.rollback();
                 LOG.warning("Password change: " + token.username + "'s' authentication token has different role.");
                 return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
-            } else if ( validation == -2 ) { // tokenID is false
+            } else if ( validation == -2 ) { // token is false
                 txn.rollback();
-                LOG.severe("Password change: " + token.username + "'s' authentication token has different tokenID, possible attempted breach.");
-                return Response.status(Status.UNAUTHORIZED).entity("TokenId incorrect, make new login").build();
+                LOG.severe("Password change: " + token.username + "'s' authentication token is different, possible attempted breach.");
+                return Response.status(Status.UNAUTHORIZED).entity("Token is incorrect, make new login").build();
             } else {
                 txn.rollback();
                 LOG.severe("Password change: " + token.username + "'s' authentication token validity error.");
@@ -285,8 +281,9 @@ public class UserResource {
         }
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = userKeyFactory.newKey(data.username);
-            Key adminKey = userKeyFactory.newKey(token.username);
+            Key userKey = serverConstants.getUserKey(data.username);
+            Key adminKey = serverConstants.getUserKey(token.username);
+            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
             if ( admin == null ) {
@@ -303,8 +300,8 @@ public class UserResource {
                 LOG.fine("Role change: User already has the same role.");
                 return Response.status(Status.NOT_MODIFIED).entity("User already had the same role, role remains unchanged.").build();
             }
-            String adminRole = admin.getString("role");
-            int validation = token.isStillValid(admin.getString("tokenID"), adminRole);
+            Entity authToken = txn.get(tokenKey);
+            int validation = token.isStillValid(authToken, admin.getString("role"));
             if ( validation == 1 ) {
                 user = Entity.newBuilder(user)
                             .set("username", user.getString("username"))
@@ -321,7 +318,6 @@ public class UserResource {
                             .set("role", data.role)
                             .set("state", user.getString("state"))
                             .set("userCreationTime", user.getTimestamp("userCreationTime"))
-                            .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
                             .set("photo", StringValue.newBuilder(user.getString("photo")).setExcludeFromIndexes(true).build())
                             .build();
                 txn.update(user);
@@ -336,10 +332,10 @@ public class UserResource {
                 txn.rollback();
                 LOG.warning("Role change: " + token.username + "'s' authentication token has different role.");
                 return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
-            } else if ( validation == -2 ) { // tokenID is false
+            } else if ( validation == -2 ) { // token is false
                 txn.rollback();
-                LOG.severe("Role change: " + token.username + "'s' authentication token has different tokenID, possible attempted breach.");
-                return Response.status(Status.UNAUTHORIZED).entity("TokenId incorrect, make new login").build();
+                LOG.severe("Role change: " + token.username + "'s' authentication token is different, possible attempted breach.");
+                return Response.status(Status.UNAUTHORIZED).entity("Token is incorrect, make new login").build();
             } else {
                 txn.rollback();
                 LOG.severe("Role change: " + token.username + "'s' authentication token validity error.");
@@ -372,8 +368,9 @@ public class UserResource {
         }
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = userKeyFactory.newKey(data.username);
-            Key adminKey = userKeyFactory.newKey(token.username);
+            Key userKey = serverConstants.getUserKey(data.username);
+            Key adminKey = serverConstants.getUserKey(token.username);
+            Key tokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
             if ( admin == null ) {
@@ -385,8 +382,9 @@ public class UserResource {
 				LOG.warning("State change: " + data.username + " not registered as user.");
                 return Response.status(Status.NOT_FOUND).entity("User is not registered as a user.").build();
             }
+            Entity authToken = txn.get(tokenKey);
             String adminRole = admin.getString("role");
-            int validation = token.isStillValid(admin.getString("tokenID"), adminRole);
+            int validation = token.isStillValid(authToken, adminRole);
             if ( validation == 1 ) {
                 if ( adminRole.equals(ServerConstants.GBO) ) {
                     if ( !user.getString("role").equals(ServerConstants.USER) ) { // GBO users can only change USER states
@@ -426,7 +424,6 @@ public class UserResource {
                     .set("role", user.getString("role"))
                     .set("state", user.getString("state").equals(ServerConstants.ACTIVE) ? ServerConstants.INACTIVE : ServerConstants.ACTIVE)
                     .set("userCreationTime", user.getTimestamp("userCreationTime"))
-                    .set("tokenID", StringValue.newBuilder(user.getString("tokenID")).setExcludeFromIndexes(true).build())
                     .set("photo", StringValue.newBuilder(user.getString("photo")).setExcludeFromIndexes(true).build())
                     .build();
                 txn.update(user);
@@ -443,8 +440,8 @@ public class UserResource {
                 return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
             } else if ( validation == -2 ) { // tokenID is false
                 txn.rollback();
-                LOG.severe("State change: " + token.username + "'s' authentication token has different tokenID, possible attempted breach.");
-                return Response.status(Status.UNAUTHORIZED).entity("TokenId incorrect, make new login").build();
+                LOG.severe("State change: " + token.username + "'s' authentication token is different, possible attempted breach.");
+                return Response.status(Status.UNAUTHORIZED).entity("Token is incorrect, make new login").build();
             } else {
                 txn.rollback();
                 LOG.severe("State change: " + token.username + "'s' authentication token validity error.");
@@ -475,11 +472,10 @@ public class UserResource {
         }
         Transaction txn = datastore.newTransaction();
         try {
-            Key userKey = userKeyFactory.newKey(data.username);
-            Key adminKey = userKeyFactory.newKey(token.username);
-            Key statsKey = datastore.newKeyFactory()
-                    .addAncestor(PathElement.of("User", data.username))
-                    .setKind("LoginStats").newKey("counters");
+            Key userKey = serverConstants.getUserKey(data.username);
+            Key userTokenKey = serverConstants.getTokenKey(data.username);
+            Key adminKey = serverConstants.getUserKey(token.username);
+            Key adminTokenKey = serverConstants.getTokenKey(token.username);
             Entity user = txn.get(userKey);
             Entity admin = txn.get(adminKey);
             if ( admin == null ) {
@@ -491,8 +487,9 @@ public class UserResource {
 				LOG.warning("Remove User: " + data.username + " not registered as user.");
                 return Response.status(Status.NOT_FOUND).entity("No such user exists.").build();
             }
+            Entity authToken = txn.get(adminTokenKey);
             String adminRole = admin.getString("role");
-            int validation = token.isStillValid(admin.getString("tokenID"), adminRole);
+            int validation = token.isStillValid(authToken, adminRole);
             if ( validation == 1 ) {
                 if ( adminRole.equals(ServerConstants.USER) ) {
                     String role = user.getString("role");
@@ -514,7 +511,7 @@ public class UserResource {
                     LOG.severe("Remove User: Unrecognized role.");
                     return Response.status(Status.INTERNAL_SERVER_ERROR).build();
                 }
-                txn.delete(userKey, statsKey);
+                txn.delete(userKey, userTokenKey);
                 txn.commit();
                 LOG.fine("Remove User: " + data.username + " removed from the database.");
                 return Response.ok().entity("User removed from database.").build();
@@ -526,10 +523,10 @@ public class UserResource {
                 txn.rollback();
                 LOG.warning("Remove User: " + token.username + "'s authentication token has different role.");
                 return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
-            } else if ( validation == -2 ) { // tokenID is false
+            } else if ( validation == -2 ) { // token is false
                 txn.rollback();
-                LOG.severe("Remove User: " + token.username + "'s authentication token has different tokenID, possible attempted breach.");
-                return Response.status(Status.UNAUTHORIZED).entity("TokenId incorrect, make new login").build();
+                LOG.severe("Remove User: " + token.username + "'s authentication token is different, possible attempted breach.");
+                return Response.status(Status.UNAUTHORIZED).entity("Token is incorrect, make new login").build();
             } else {
                 txn.rollback();
                 LOG.severe("Remove User: authentication token validity error.");
