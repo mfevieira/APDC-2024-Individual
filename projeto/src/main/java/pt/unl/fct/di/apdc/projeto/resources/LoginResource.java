@@ -67,6 +67,11 @@ public class LoginResource {
 				txn.rollback();
 				return Response.status(Status.NOT_FOUND).entity("No such user exists.").build();
 			}
+			if ( user.getString("state").equals(ServerConstants.INACTIVE) ) {
+				LOG.warning("Login: " + data.username + " not an active user.");
+				txn.rollback();
+				return Response.status(Status.UNAUTHORIZED).entity("User's account is inactive.").build();
+			}
 			Entity stats = txn.get(statsKey);
 			if ( stats == null ) {
 				stats = Entity.newBuilder(statsKey)
