@@ -85,3 +85,8 @@ button[type="submit"] {
     border: 1px solid #ccc;
     border-radius: 5px;
 }
+
+#message {
+    width: 100%;
+    height: 100px; /* Adjust the height as needed */
+}
