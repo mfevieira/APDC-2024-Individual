@@ -101,6 +101,41 @@ public class LoginResource {
 	@POST
 	@Path("/check")
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getToken(AuthToken token) {
+		LOG.fine("Token: token check attempt by " + token.username + ".");
+		Key userKey = serverConstants.getUserKey(token.username);
+		Key tokenKey = serverConstants.getTokenKey(token.username);
+		Entity user = datastore.get(userKey);
+		if ( user == null ) {
+			LOG.warning("Token: " + token.username + " is not a registered user.");
+			return Response.status(Status.NOT_FOUND).entity(token.username + " is not a registered user.").build();
+		}
+		Entity authToken = datastore.get(tokenKey);
+		String role = user.getString("role");
+		int validation = token.isStillValid(authToken, role);
+		if ( validation == 1 ) {
+			LOG.fine("Token: " + token.username + " is still logged in.");
+			return Response.ok(g.toJson(token)).build();
+		} else if ( validation == 0 ) { // Token time has run out
+			LOG.fine("Token: " + token.username + "'s authentication token expired.");
+			return Response.status(Status.UNAUTHORIZED).entity("Token time limit exceeded, make new login.").build();
+		} else if ( validation == -1 ) { // Role is different
+			LOG.warning("Token: " + token.username + "'s authentication token has different role.");
+			return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
+		} else if ( validation == -2 ) { // token is false
+			LOG.severe("Token: " + token.username + "'s authentication token is different, possible attempted breach.");
+			return Response.status(Status.UNAUTHORIZED).entity("Token is incorrect, make new login").build();
+		} else {
+			LOG.fine("Token: authentication token validity error.");
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+
+	@POST
+	@Path("/check")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response checkToken(AuthToken token) {
 		LOG.fine("Check: token check attempt by " + token.username + ".");
 		Key userKey = serverConstants.getUserKey(token.username);
