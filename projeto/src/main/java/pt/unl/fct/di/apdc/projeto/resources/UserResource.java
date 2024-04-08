@@ -15,7 +15,10 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
@@ -110,8 +113,7 @@ public class UserResource {
                         LOG.warning("Data change: " + token.username + " cannot change non USER users data.");
                         return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change data of non USER users.").build();
                     }
-                    if ( data.role == null || data.role.trim().isEmpty() ) {
-                    } else {
+                    if ( data.role != null && !data.role.trim().isEmpty() ) {
                         txn.rollback();
                         LOG.warning("Data change: " + token.username + " cannot change users' role.");
                         return Response.status(Status.UNAUTHORIZED).entity("GBO users cannot change users' role.").build();
@@ -519,6 +521,15 @@ public class UserResource {
                     LOG.severe("Remove User: Unrecognized role.");
                     return Response.status(Status.INTERNAL_SERVER_ERROR).build();
                 }
+                Query<Entity> query = Query.newEntityQueryBuilder()
+                    .setKind("Message")
+                    .setFilter(PropertyFilter.hasAncestor(userKey))
+                    .build();
+                QueryResults<Entity> results = txn.run(query);
+                while ( results.hasNext() ) {
+                    Entity next = results.next();
+                    txn.delete(next.getKey());
+                }
                 txn.delete(userKey, userTokenKey);
                 txn.commit();
                 LOG.fine("Remove User: " + data.username + " removed from the database.");
@@ -611,6 +622,49 @@ public class UserResource {
                                             user.getString("postalcode"), user.getString("fiscal"), user.getString("role"), 
                                             user.getString("state"), user.getTimestamp("userCreationTime").toDate(), user.getString("photo"));
                 LOG.fine("Search User: " + data.username + "'s information' sent to user.");
+                return Response.ok(g.toJson(searchUser)).build();
+            } else if (validation == 0 ) { // Token time has run out     
+                LOG.fine("Search User: " + token.username + "'s authentication token expired.");
+                return Response.status(Status.UNAUTHORIZED).entity("Token time limit exceeded, make new login.").build();
+            } else if ( validation == -1 ) { // Role is different
+                LOG.warning("Search User: " + token.username + "'s authentication token has different role.");
+                return Response.status(Status.UNAUTHORIZED).entity("User role has changed, make new login.").build();
+            } else if ( validation == -2 ) { // token is false
+                LOG.severe("Search User: " + token.username + "'s authentication token is different, possible attempted breach.");
+                return Response.status(Status.UNAUTHORIZED).entity("Token is incorrect, make new login").build();
+            } else {
+                LOG.severe("Search User: authentication token validity error.");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+        } catch ( Exception e ) {
+			LOG.severe("Search User: " + e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+    }
+
+    @POST
+    @Path("/profile")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    public Response getUser(AuthToken token) {
+        LOG.fine("Get User: get user attempt by " + token.username + ".");
+        try {
+            Key userKey = serverConstants.getUserKey(token.username);
+            Key userTokenKey = serverConstants.getTokenKey(token.username);
+            Entity user = datastore.get(userKey);
+            if ( user == null ) {
+				LOG.warning("Search User: " + token.username + " not registered as user.");
+                return Response.status(Status.NOT_FOUND).entity("No such user exists.").build();
+            }
+            Entity authToken = datastore.get(userTokenKey);
+            String adminRole = user.getString("role");
+            int validation = token.isStillValid(authToken, adminRole);
+            if ( validation == 1 ) {
+                User searchUser = new User(user.getString("username"), user.getString("email"), user.getString("name"), 
+                                            user.getString("phone"), user.getString("profile"), user.getString("work"), 
+                                            user.getString("workplace"), user.getString("address"), user.getString("postalcode"), 
+                                            user.getString("fiscal"), user.getTimestamp("userCreationTime").toDate(), user.getString("photo"));
+                LOG.fine("Search User: " + token.username + "'s information' sent to user.");
                 return Response.ok(g.toJson(searchUser)).build();
             } else if (validation == 0 ) { // Token time has run out     
                 LOG.fine("Search User: " + token.username + "'s authentication token expired.");

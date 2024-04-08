@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         var token = JSON.parse(authToken);
         jsonData['token'] = token;
-        changeUserState(JSON.stringify(jsonData));
+        searchUser(JSON.stringify(jsonData));
     });
 
-    function changeUserState(jsonData) {
+    function searchUser(jsonData) {
         fetch('/rest/user/search', {
             method: 'POST',
             headers: {

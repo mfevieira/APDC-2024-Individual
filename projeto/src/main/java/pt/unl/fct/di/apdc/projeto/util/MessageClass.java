@@ -18,6 +18,12 @@ public class MessageClass {
 
     }
 
+    public MessageClass(String sender, String receiver, String message) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.message = message;
+    }
+
     public MessageClass(String sender, String receiver, String message, Date timeStamp) {
         this.sender = sender;
         this.receiver = receiver;

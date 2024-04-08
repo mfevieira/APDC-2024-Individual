@@ -46,6 +46,22 @@ public class User {
         this.photo = photo;
     }
 
+    public User(String username, String email, String name, String phone, String profile, String work, String workplace, 
+                String address, String postalcode, String fiscal, Date userCreationTime, String photo) {
+        this.username = username;
+		this.email = email;
+		this.name = name;
+		this.phone = phone;
+        this.profile = profile;
+        this.work = work;
+        this.workplace = workplace;
+        this.address = address;
+        this.postalcode = postalcode;
+        this.fiscal = fiscal;
+        this.userCreationTime = userCreationTime;
+        this.photo = photo;
+    }
+
     public User(String username, String password, String email, String name, String phone, String profile, String work, String workplace, 
                 String address, String postalcode, String fiscal, String role, String state, Date userCreationTime, String photo) {
         this.username = username;
